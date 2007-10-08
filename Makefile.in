@@ -1,5 +1,5 @@
 # ============================================
-# $Id: Makefile.in,v 1.1 2007/10/08 15:41:17 eric Exp $
+# $Id: Makefile.in,v 1.2 2007/10/08 16:37:20 eric Exp $
 # ============================================
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
@@ -12,24 +12,18 @@ export pubdir utildir appname
 
 TAR = gtar
 GZIP_ENV = --best
-TOP_MODULES = nu.php
 export targetdir PACKAGE
 
-SUBDIR= Class Zone Api Images
+SUBDIR= Class  Images
 
 include $(utildir)/PubRule
 
-DISTFILES += $(SUBDIR) networkuser.ods \
+DISTFILES += $(SUBDIR) mailconnector.ods \
             RELEASE VERSION 
 
-$(pubdir)/EXTERNALS :
-	mkdir -p $@
-
-$(pubdir)/EXTERNALS/nu.php: $(pubdir)/EXTERNALS nu.php
-	cd $(pubdir)/EXTERNALS;ln -s ../$(appname)/$(appname)_external.php nu.php
 
 
-$(pubdir)/$(appname)/networkuser.ods : networkuser.ods
-	cp networkuser.ods $(pubdir)/$(appname)
+$(pubdir)/$(appname)/mailconnector.ods : mailconnector.ods
+	cp $< $(pubdir)/$(appname)
 
-publish: $(pubdir)/$(appname)/networkuser.ods $(pubdir)/EXTERNALS/nu.php 
+publish: $(pubdir)/$(appname)/mailconnector.ods 
