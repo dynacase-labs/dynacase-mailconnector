@@ -3,11 +3,12 @@
 public $mbox;
 function specRefresh() {
  
-  $err=$this->mb_testConnection();
+    $err=$this->mb_connection();
+    if ($err=="")  $this->mb_retreiveMessages();
   return $err;
 
 }
-function mb_testConnection() {
+function mb_connection() {
   include_once("FDL/Lib.Vault.php");
   $login=$this->getValue("mb_login");
   $password=$this->getValue("mb_password");
@@ -16,17 +17,25 @@ function mb_testConnection() {
   $ssl=$this->getValue("mb_security");
 
 
-  if ($ssl=="SSL") $fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}INBOX",$server,$port);
-  else $fimap=sprintf("{%s:%d}INBOX.Test",$server,$port);
+  $folder=$this->getValue("mb_folder","INBOX");
+  if ($ssl=="SSL") $this->fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}%s",$server,$port,$folder);
+  else $this->fimap=sprintf("{%s:%d}%s",$server,$port,$folder);
+
   imap_timeout(1,5); // 5 seconds
-  $this->mbox = @imap_open($fimap,$login ,$password );
+  $this->mbox = @imap_open($this->fimap,$login ,$password );
   if (!$this->mbox) {
     $err=imap_last_error();
     $this->setValue("mb_connectedimage","mailbox_red.png");
   } else {
-    $this->setValue("mb_connectedimage","mailbox_green.png");    
+    $this->setValue("mb_connectedimage","mailbox_green.png");
+  }
+  $this->modify();
+  return $err;
+}
+
+function mb_retreiveMessages() {
     echo "<h1>Mailboxes</h1>\n";
-    $folders = imap_listmailbox($this->mbox, $fimap, "*");
+    $folders = imap_listmailbox($this->mbox, $this->fimap, "*");
 
     if ($folders == false) {
       echo "Appel echoue<br />\n";
@@ -36,16 +45,9 @@ function mb_testConnection() {
       }
     }
 
-    echo "<h1>headers dans INBOX</h1>\n";
-    $headers = imap_headers($this->mbox);
+  
 
-    if ($headers == false) {
-      echo "Appel echoue<br />\n";
-    } else {
-      foreach ($headers as $val) {
-        echo "[$val]" . "<br />\n";
-      }
-    }
+  
 
     //  $msgs = imap_sort($this->mbox,SORTDATE,1 );
     $msgs = imap_search($this->mbox,'UNFLAGGED' );
@@ -54,11 +56,9 @@ function mb_testConnection() {
 	$this->mb_parseMessage($val);
 	//print_r2( imap_fetchheader($this->mbox,$val));
       }
-    } else {
-      echo "imap_list a echoue : " . imap_last_error() . "\n";
-    }
+    } 
     imap_close($this->mbox);
-  }
+  
 
   return $err;
 
@@ -73,8 +73,10 @@ static function mb_decode($s) {
  $t=imap_mime_header_decode($s);
  $ot='';
  foreach ($t as $st) {
-   $ot.=$st->text;
+   if ($st->charset=="utf-8") $ot.=utf8_decode($st->text);
+   else $ot.=$st->text;
  }
+ print_r2($t);
  return $ot;
 }
 
@@ -101,15 +103,16 @@ function mb_parseMessage($msg) {
    $this->msgStruct["size"]=$h->Size;
 
 
-   $status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
+   //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
    // $status = imap_setflag_full($this->mbox, $msg, '\\Flagged');
    $status = imap_setflag_full($this->mbox, $msg, '$label3');
 
 
    $o=imap_fetchstructure($this->mbox,$msg);
-   //  print_r2($o);
+     print_r2($o);
    if ($o->subtype=="PLAIN") {
      $body=imap_body($this->mbox,$msg);
+     $this->mb_bodydecode($o,$body);
      $this->msgStruct["textbody"]=$body;
    } else  if ($o->subtype=="HTML") {
      $body=imap_body($this->mbox,$msg);
@@ -118,8 +121,9 @@ function mb_parseMessage($msg) {
    
    } else  if ($o->subtype=="ALTERNATIVE") {
      if ($o->parts[0]->subtype=="PLAIN") {
-       $body1=imap_fetchbody($this->mbox,$msg,'1');
-       $this->msgStruct["textbody"]=$body1;
+       $body=imap_fetchbody($this->mbox,$msg,'1'); 
+       $this->mb_bodydecode($o->parts[0],$body);              
+       $this->msgStruct["textbody"]=$body;
      }
      if ($o->parts[1]->subtype=="HTML") {
        $body=imap_fetchbody($this->mbox,$msg,'2');
@@ -141,13 +145,40 @@ function mb_parseMessage($msg) {
    $this->mb_createMessage();
 
 }
+function mb_bodydecode($part,&$body) {
+  switch ($part->encoding) {
+  case 3: // base64
+    $body=imap_base64($body);
+    break;
+  case 0: // 7bit
+    break;
+  case 1: // 8bit
+    break;
+  case 2: //Binary
+    break;
+  case 4: // QUOTED-PRINTABLE
+    $body=(quoted_printable_decode($body));
+    break;
+  case 5: // Others
+    break;
+  }
+  if ($part->ifparameters) {
+    foreach ($part->parameters as $v) {
+      if (($v->attribute=="charset") && ($v->value=="utf-8")) $body=utf8_decode($body);
+    }
+  }
 
+}
 function mb_getmultipart($o,$msg,$chap="") {
    foreach ($o->parts as $k=>$part) {
 
      //     print "<ul><b>".sprintf("$chap%d",$k+1)."</b></ul>";
        if ($part->subtype=="PLAIN") {
 	 $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
+	 
+	 $this->mb_bodydecode($part,$body);
+
+
 	 $this->msgStruct["textbody"]=$body;
        } else  if ($part->subtype=="HTML") {
 	 $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
@@ -162,22 +193,8 @@ function mb_getmultipart($o,$msg,$chap="") {
 
 	   print "<h1>".sprintf("$chap%d",$k+1)."</h1>";
 	   $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
-	   switch ($part->encoding) {
-	   case 3: // base64
-	     $body=imap_base64($body);
-	     break;
-	   case 0: // 7bit
-	     break;
-	   case 1: // 8bit
-	     break;
-	   case 2: //Binary
-	     break;
-	   case 4: // QUOTED-PRINTABLE
-	     $body=quoted_printable_decode($body);
-	     break;
-	   case 5: // Others
-	     break;
-	   }
+	   
+	   $this->mb_bodydecode($part,$body);
 	   $basename="";
 	   if ($part->ifdparameters) {
 	     foreach ($part->dparameters as $param) {
@@ -186,7 +203,7 @@ function mb_getmultipart($o,$msg,$chap="") {
 	   }
 	   if ($part->ifparameters) {
 	     foreach ($part->parameters as $param) {
-	       if ($param->attribute=="NAME") $cid=$param->value;
+	       if ($param->attribute=="NAME") $name=$param->value;
 	     }
 	   }
 	   $filename=uniqid("/var/tmp/_fdl").'.'.strtolower($part->subtype);
@@ -212,9 +229,12 @@ static function mb_implodemail($struct) {
   if (! is_array($struct)) return false;
   foreach ($struct as $k=>$v) {
     $email=$v->mailbox.'@'.$v->host;
-    if (isset($v->personal)) $email=$v->personal.' <'.$email.'>';    
+    if (isset($v->personal)) $email=self::mb_decode($v->personal).' <'.$email.'>';  
+
+    
     $tmail[$k]=$email;
   }
+
   return implode(";",$tmail);
 }
 
