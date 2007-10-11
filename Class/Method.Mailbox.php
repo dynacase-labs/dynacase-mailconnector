@@ -2,11 +2,11 @@
 
 public $mbox;
 function specRefresh() {
+ 
   $err=$this->mb_testConnection();
   return $err;
-  }
 
-
+}
 function mb_testConnection() {
   include_once("FDL/Lib.Vault.php");
   $login=$this->getValue("mb_login");
@@ -17,7 +17,7 @@ function mb_testConnection() {
 
 
   if ($ssl=="SSL") $fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}INBOX",$server,$port);
-  else $fimap=sprintf("{%s:%d}INBOX",$server,$port);
+  else $fimap=sprintf("{%s:%d}INBOX.Test",$server,$port);
   imap_timeout(1,5); // 5 seconds
   $this->mbox = @imap_open($fimap,$login ,$password );
   if (!$this->mbox) {
@@ -29,7 +29,7 @@ function mb_testConnection() {
     $folders = imap_listmailbox($this->mbox, $fimap, "*");
 
     if ($folders == false) {
-      echo "Appel échoué<br />\n";
+      echo "Appel echoue<br />\n";
     } else {
       foreach ($folders as $val) {
         echo $val . "<br />\n";
@@ -40,7 +40,7 @@ function mb_testConnection() {
     $headers = imap_headers($this->mbox);
 
     if ($headers == false) {
-      echo "Appel échoué<br />\n";
+      echo "Appel echoue<br />\n";
     } else {
       foreach ($headers as $val) {
         echo "[$val]" . "<br />\n";
@@ -55,7 +55,7 @@ function mb_testConnection() {
 	//print_r2( imap_fetchheader($this->mbox,$val));
       }
     } else {
-      echo "imap_list a échoué : " . imap_last_error() . "\n";
+      echo "imap_list a echoue : " . imap_last_error() . "\n";
     }
     imap_close($this->mbox);
   }
@@ -91,14 +91,14 @@ function mb_parseMessage($msg) {
 
   
   //	print("<b>$body</b>");
-
-   $struct["subject"]=$this->mb_decode($h->subject);
-   $struct["uid"]=$uid;
-   $struct["date"]=$h->date;
-   $struct["to"]=$this->mb_implodemail($h->to);
-   $struct["from"]=$this->mb_implodemail($h->from);
-   $struct["cc"]=$this->mb_implodemail($h->cc);
-   $struct["size"]=$h->Size;
+  $this->msgStruct=array();
+   $this->msgStruct["subject"]=$this->mb_decode($h->subject);
+   $this->msgStruct["uid"]=$uid;
+   $this->msgStruct["date"]=$h->date;
+   $this->msgStruct["to"]=$this->mb_implodemail($h->to);
+   $this->msgStruct["from"]=$this->mb_implodemail($h->from);
+   $this->msgStruct["cc"]=$this->mb_implodemail($h->cc);
+   $this->msgStruct["size"]=$h->Size;
 
 
    $status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
@@ -107,47 +107,48 @@ function mb_parseMessage($msg) {
 
 
    $o=imap_fetchstructure($this->mbox,$msg);
-   print_r2($o);
+   //  print_r2($o);
    if ($o->subtype=="PLAIN") {
      $body=imap_body($this->mbox,$msg);
-     $struct["textbody"]=$body;
+     $this->msgStruct["textbody"]=$body;
    } else  if ($o->subtype=="HTML") {
      $body=imap_body($this->mbox,$msg);
-     $struct["htmlbody"]=$body;
+     $this->msgStruct["htmlbody"]=$body;
      
    
    } else  if ($o->subtype=="ALTERNATIVE") {
      if ($o->parts[0]->subtype=="PLAIN") {
        $body1=imap_fetchbody($this->mbox,$msg,'1');
-       $struct["textbody"]=$body1;
+       $this->msgStruct["textbody"]=$body1;
      }
      if ($o->parts[1]->subtype=="HTML") {
        $body=imap_fetchbody($this->mbox,$msg,'2');
-       $struct["htmlbody"]=$body;       
+       $this->msgStruct["htmlbody"]=$body;       
      } else if ($o->parts[1]->subtype=="RELATED") {
-       $this->mb_getmultipart($o->parts[1],$msg,$struct,'2.');
+       $this->mb_getmultipart($o->parts[1],$msg,'2.');
      } else if ($o->parts[1]->subtype=="MIXED") {
-       $this->mb_getmultipart($o->parts[1],$msg,$struct,'2.');
+       $this->mb_getmultipart($o->parts[1],$msg,'2.');
      }
    } else if ($o->subtype=="MIXED") {
-     $this->mb_getmultipart($o,$msg,$struct);
+     $this->mb_getmultipart($o,$msg);
     
    } else if ($o->subtype=="RELATED") {
-     $this->mb_getmultipart($o,$msg,$struct);
+     $this->mb_getmultipart($o,$msg);
    }
 
 
-   $this->mb_createMessage($struct);
+   $this->mb_getcid($msg);
+   $this->mb_createMessage();
 
 }
 
-function mb_getmultipart($o,$msg,&$struct,$chap="") {
+function mb_getmultipart($o,$msg,$chap="") {
    foreach ($o->parts as $k=>$part) {
 
-     print "<ul><b>".sprintf("$chap%d",$k+1)."</b></ul>";
+     //     print "<ul><b>".sprintf("$chap%d",$k+1)."</b></ul>";
        if ($part->subtype=="PLAIN") {
 	 $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
-	 $struct["textbody"]=$body;
+	 $this->msgStruct["textbody"]=$body;
        } else  if ($part->subtype=="HTML") {
 	 $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
 	 switch ($part->encoding) {
@@ -155,9 +156,11 @@ function mb_getmultipart($o,$msg,&$struct,$chap="") {
 	     $body=quoted_printable_decode($body);
 	     break;
 	 }	 
-	 $struct["htmlbody"]=$body;       
+	 $this->msgStruct["htmlbody"]=$body;       
        } else {
 	 if (($part->disposition=="INLINE")||($part->disposition=="ATTACHMENT")) {
+
+	   print "<h1>".sprintf("$chap%d",$k+1)."</h1>";
 	   $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
 	   switch ($part->encoding) {
 	   case 3: // base64
@@ -181,13 +184,19 @@ function mb_getmultipart($o,$msg,&$struct,$chap="") {
 	       if ($param->attribute=="FILENAME") $basename=basename($param->value);
 	     }
 	   }
+	   if ($part->ifparameters) {
+	     foreach ($part->parameters as $param) {
+	       if ($param->attribute=="NAME") $cid=$param->value;
+	     }
+	   }
 	   $filename=uniqid("/var/tmp/_fdl").'.'.strtolower($part->subtype);
 	   $nc=file_put_contents($filename,$body);
-	   $struct["file"][]=$filename;
-	   $struct["basename"][]=$basename;;
+	   $this->msgStruct["file"][]=$filename;
+	   $this->msgStruct["basename"][]=$basename;
+	   // $this->msgStruct["cid"][]=$cid;
 	 } else  if ($part->subtype=="RELATED") {
 	   print "<b>RELATED BIS</b><br>";
-	   $this->mb_getmultipart($part,$msg,$struct,sprintf("$chap%d.",$k+1));
+	   $this->mb_getmultipart($part,$msg,sprintf("$chap%d.",$k+1));
 	 }
        }
      }
@@ -210,9 +219,10 @@ static function mb_implodemail($struct) {
 }
 
 
-function mb_createMessage($msgStruct) {
+function mb_createMessage() {
   include_once("FDL/Lib.Dir.php");
-  $uid=pg_escape_string($msgStruct["uid"]);
+
+  $uid=pg_escape_string($this->msgStruct["uid"]);
   $filter[]="emsg_uid='$uid'";
   $tdir=getChildDoc($this->dbaccess,0,"0",1,$filter,1,"LIST","EMESSAGE");
   if (count($tdir)==0) {
@@ -220,26 +230,26 @@ function mb_createMessage($msgStruct) {
   } else {
     $msg=$tdir[0];
   }
-  //  print_r2($msgStruct);
+  //  print_r2($this->msgStruct);
   if ($msg) {
       $msg->setValue("emsg_mailboxid",$this->id);
-      $msg->setValue("emsg_uid",$msgStruct["uid"]);
-      $msg->setValue("emsg_subject",$msgStruct["subject"]);
-      $msg->setValue("emsg_from",$msgStruct["from"]);
-      $msg->setValue("emsg_date",$msgStruct["date"]);
-      $msg->setValue("emsg_size",$msgStruct["size"]);
-      $msg->setValue("emsg_textbody",$msgStruct["textbody"]==""?' ':$msgStruct["textbody"]);
-      $msg->setValue("emsg_htmlbody",$msgStruct["htmlbody"]==""?' ':$msgStruct["htmlbody"]);
+      $msg->setValue("emsg_uid",$this->msgStruct["uid"]);
+      $msg->setValue("emsg_subject",$this->msgStruct["subject"]);
+      $msg->setValue("emsg_from",$this->msgStruct["from"]);
+      $msg->setValue("emsg_date",$this->msgStruct["date"]);
+      $msg->setValue("emsg_size",$this->msgStruct["size"]);
+      $msg->setValue("emsg_textbody",$this->msgStruct["textbody"]==""?' ':$this->msgStruct["textbody"]);
+
       $ttype=array();
       $tname=array();
-      $tos=explode(';',$msgStruct["to"]);
+      $tos=explode(';',$this->msgStruct["to"]);
       foreach ($tos as $to) {
 	if ($to) {
 	  $ttype[]='to';
 	  $tname[]=$to;
 	}
       }
-      $tos=explode(';',$msgStruct["cc"]);
+      $tos=explode(';',$this->msgStruct["cc"]);
       foreach ($tos as $cc) {
 	if ($cc) {
 	  $ttype[]='cc';
@@ -249,25 +259,69 @@ function mb_createMessage($msgStruct) {
       
       $msg->setValue("emsg_sendtype",$ttype);
       $msg->setValue("emsg_recipient",$tname);
+      if (! $msg->isAffected()) $err=$msg->Add();
+
+      if ($err=="") {
+
+	if (is_array($this->msgStruct["file"])) {
+	  // Add attachments files
+	  $err=$msg->storeFiles('emsg_attach',$this->msgStruct["file"],$this->msgStruct["basename"]);
+	  foreach ($this->msgStruct["file"] as $f) {
+	    if (is_file($f)) @unlink($f); // delete temporary files
+	  }
+	  $this->msgStruct["vid"]=$msg->getTValue('emsg_attach');
+	  if ($this->msgStruct["htmlbody"]) $this->msgStruct["htmlbody"]=$this->mb_replacid($this->msgStruct["htmlbody"],$msg->id);
+	}
+
+      
+      
+	$msg->setValue("emsg_htmlbody",$this->msgStruct["htmlbody"]==""?' ':$this->msgStruct["htmlbody"]);
 
 
-      if (is_array($msgStruct["file"])) {
-	// Add attachments files
-	$err=$msg->storeFiles('emsg_attach',$msgStruct["file"],$msgStruct["basename"]);
-	foreach ($msgStruct["file"] as $f) {
-	  if (is_file($f)) @unlink($f); // delete temporary files
+	$err=$msg->Modify();
+     
+	if ($err=="") {
+	  $this->addFile($msg->id);
 	}
       }
-
-      if ($msg->isAffected()) $err=$msg->Modify();
-      else $err=$msg->Add();
-      if ($err=="") {
-	$this->addFile($msg->id);
-      }
-  }
-
-  
-  
+  } 
 }
 
+
+function mb_replacid($msg,$docid) {
+  $this->msgid=$docid;
+    $out = preg_replace(
+		      '/"(cid:[^"]+)"/se', 
+		      "\$this->mb_cid2http('\\1')",
+		      $msg);
+    
+    return $out;
+}
+function mb_getcid($msg) {
+
+  $out = preg_replace('/Content-ID:\s*<([^\s]+)>/sei', 
+		      "\$this->mb_putcid('\\1')",
+		      imap_body($this->mbox,$msg) );
+}
+
+function mb_putcid($cid) {
+  $this->msgStruct["cid"][]=trim($cid);
+}
+
+function mb_cid2http($url) {
+  $cid=substr($url,4);
+  $key = array_search($cid,$this->msgStruct["cid"] ); 
+ 
+  if (ereg ("(.*)\|(.*)",$this->msgStruct["cid"]["key"] , $reg)) {
+    $vid=$reg[2];
+    $mime=$reg[1];
+  }
+  $docid=$this->msgid;
+
+  $url=sprintf("?sole=A&app=FDL&action=EXPORTFILE&vid=%d&docid=%d&attrid=emsg_attach&index=%d",
+	       $vid,
+	       $docid,
+	       $key);
+  return ('"'.$url.'"');
+} 
 ?>
