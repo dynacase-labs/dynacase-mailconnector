@@ -7,17 +7,20 @@ function getimapfolders($mboxid) {
     $err=$mb->mb_connection();
     if ($err=="") {
       $list=imap_list($mb->mbox, $mb->fimap, "*");
+      //      print_r2($list);
+      sort($list);
       foreach ($list as $k=>$fld) {
+	$fld=mb_convert_encoding( $fld, "ISO_8859-1", "UTF7-IMAP" ); 
+	//print "|$fld]\n<br>";
+	//	$fld=$mb->imap_utf7_decode_zero($fld);
 	$f=substr($fld,strpos($fld,'}')+1);
+
 	$tr[]=array($f,$f);
       }
-      print_r2($list);
     }
   }
 
 
-  $tr[] = array("toto" ,$mb->title);
-  $tr[] = array("tot2-$mboxid" ,$mb->title);
   if ($err) return $err;
   return $tr;
   }

@@ -2,9 +2,9 @@
 
 public $mbox;
 function specRefresh() {
- 
+
     $err=$this->mb_connection();
-    if ($err=="")  $this->mb_retreiveMessages();
+         if ($err=="")  $err=$this->mb_retreiveMessages();
   return $err;
 
 }
@@ -17,12 +17,14 @@ function mb_connection() {
   $ssl=$this->getValue("mb_security");
 
 
-  $folder=$this->getValue("mb_folder","INBOX");
-  if ($ssl=="SSL") $this->fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}%s",$server,$port,$folder);
-  else $this->fimap=sprintf("{%s:%d}%s",$server,$port,$folder);
-
+  if ($ssl=="SSL") $this->fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}",$server,$port);
+  else $this->fimap=sprintf("{%s:%d/imap/notls}",$server,$port);
+  
+  $this->imapconnection=$this->fimap."INBOX";
+  
+  //  print_r2($this->imapconnection);
   imap_timeout(1,5); // 5 seconds
-  $this->mbox = @imap_open($this->fimap,$login ,$password );
+  $this->mbox = @imap_open($this->imapconnection,$login ,$password );
   if (!$this->mbox) {
     $err=imap_last_error();
     $this->setValue("mb_connectedimage","mailbox_red.png");
@@ -33,37 +35,49 @@ function mb_connection() {
   return $err;
 }
 
-function mb_retreiveMessages() {
-    echo "<h1>Mailboxes</h1>\n";
-    $folders = imap_listmailbox($this->mbox, $this->fimap, "*");
+function mb_retreiveMessages() {   
+  $folder=$this->getValue("mb_folder","INBOX");
 
-    if ($folders == false) {
-      echo "Appel echoue<br />\n";
-    } else {
-      foreach ($folders as $val) {
-        echo $val . "<br />\n";
-      }
-    }
+  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+ 
+  print_r2($fdir);
 
-  
+  if (!imap_reopen($this->mbox,$fdir)) {
+    $err=sprintf(_("imap folder %s not found"), $folder);    
+  }
 
-  
-
-    //  $msgs = imap_sort($this->mbox,SORTDATE,1 );
-    $msgs = imap_search($this->mbox,'UNFLAGGED' );
-    if (is_array($msgs)) {
-      foreach ($msgs as $k=>$val) {
-	$this->mb_parseMessage($val);
-	//print_r2( imap_fetchheader($this->mbox,$val));
-      }
-    } 
-    imap_close($this->mbox);
+  if ($err=="") {     
+     $msgs = imap_search($this->mbox,'UNFLAGGED' );
+     if (is_array($msgs)) {
+       $err=sprintf("%d messages",count($msgs));
+       /*
+       foreach ($msgs as $k=>$val) {
+	 $this->mb_parseMessage($val);	
+	 }*/
+     } else {
+       
+       $err=sprintf(_("no new messages in imap %s folder"), $folder);
+     }
+     
+  }
+  imap_close($this->mbox);
   
 
   return $err;
 
 }
 
+/**
+ * utf7-decode workaround
+ * delete parasite null character
+ * @return string iso8859-1
+ */
+static function imap_utf7_decode_zero($s) {
+  print "[$s]";
+  $s=imap_utf7_decode($s);
+  $s=str_replace("\0","",$s);
+  return $s;
+}
 /**
  * decode headers text
  * @param string $s encoded text
@@ -76,7 +90,7 @@ static function mb_decode($s) {
    if ($st->charset=="utf-8") $ot.=utf8_decode($st->text);
    else $ot.=$st->text;
  }
- print_r2($t);
+
  return $ot;
 }
 
@@ -189,6 +203,7 @@ function mb_getmultipart($o,$msg,$chap="") {
 	 }	 
 	 $this->msgStruct["htmlbody"]=$body;       
        } else {
+	 $part->disposition=strtoupper($part->disposition);
 	 if (($part->disposition=="INLINE")||($part->disposition=="ATTACHMENT")) {
 
 	   print "<h1>".sprintf("$chap%d",$k+1)."</h1>";
@@ -198,11 +213,13 @@ function mb_getmultipart($o,$msg,$chap="") {
 	   $basename="";
 	   if ($part->ifdparameters) {
 	     foreach ($part->dparameters as $param) {
+	       $param->attribute=strtoupper($param->attribute);
 	       if ($param->attribute=="FILENAME") $basename=basename($param->value);
 	     }
 	   }
 	   if ($part->ifparameters) {
 	     foreach ($part->parameters as $param) {
+	       $param->attribute=strtoupper($param->attribute);
 	       if ($param->attribute=="NAME") $name=$param->value;
 	     }
 	   }
