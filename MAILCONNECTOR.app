@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------
-// $Id: MAILCONNECTOR.app,v 1.1 2007/10/08 15:41:17 eric Exp $
+// $Id: MAILCONNECTOR.app,v 1.2 2007/10/12 16:04:56 eric Exp $
 // $Source: /home/cvsroot/anakeen/freedom/mailconnector/MAILCONNECTOR.app,v $
 // ---------------------------------------------------------------
 //  O   Anakeen - 2001
@@ -23,17 +23,25 @@
 // ---------------------------------------------------------------
 
 $app_desc = array (
-		   "name"	 =>"NU",		//Name
-		   "short_name"	=>N_("Network users"),    	//Short name
-		   "description"=>N_("Network users and LDAP authentification"),  //long description
+		   "name"	 =>"MAILCONNECTOR",		//Name
+		   "short_name"	=>N_("Mail connector"),    	//Short name
+		   "description"=>N_("Copy messages from IMAP to freedom"),  //long description
 		   "access_free"=>"Y",			//Access free ? (Y,N)
-		   "icon"	=>"nu.png",	//Icon
+		   "icon"	=>"mailconnector.png",	//Icon
 		   "displayable"=>"N",			//Should be displayed on an app list (Y,N)
 		   "with_frame"	=>"N",			//Use multiframe ? (Y,N)
 		   "childof"	=>""		        // instance of FREEDOM GENERIC application	
 		   );
 
   
+$action_desc = array (
+		      array( 
+			    "name" => "MB_TESTCONNECTION", 
+			    "short_name" =>N_("test connection with IMAP server")),
+		      array( 
+			    "name" => "MB_RETRIEVEMESSAGES", 
+			    "short_name" =>N_("retrieves messages from IMAP server"))
+		      )
 
 
 		

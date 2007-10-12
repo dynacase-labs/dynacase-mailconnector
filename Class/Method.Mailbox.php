@@ -1,10 +1,10 @@
 <?php
 
 public $mbox;
-function specRefresh() {
+function specRefresh2() {
 
     $err=$this->mb_connection();
-         if ($err=="")  $err=$this->mb_retreiveMessages();
+         if ($err=="")  $err=$this->mb_retrieveMessages();
   return $err;
 
 }
@@ -27,20 +27,19 @@ function mb_connection() {
   $this->mbox = @imap_open($this->imapconnection,$login ,$password );
   if (!$this->mbox) {
     $err=imap_last_error();
-    $this->setValue("mb_connectedimage","mailbox_red.png");
-  } else {
-    $this->setValue("mb_connectedimage","mailbox_green.png");
-  }
-  $this->modify();
+  } 
   return $err;
 }
 
-function mb_retreiveMessages() {   
+/**
+ * retrieve unflagged messages from specific folder
+ * @param int  &$count return number of messages transffered
+ * @param bool $justcount set ti true to just return number of messages
+ */
+function mb_retrieveMessages(&$count,$justcount=false) {   
   $folder=$this->getValue("mb_folder","INBOX");
 
   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
- 
-  print_r2($fdir);
 
   if (!imap_reopen($this->mbox,$fdir)) {
     $err=sprintf(_("imap folder %s not found"), $folder);    
@@ -49,11 +48,16 @@ function mb_retreiveMessages() {
   if ($err=="") {     
      $msgs = imap_search($this->mbox,'UNFLAGGED' );
      if (is_array($msgs)) {
-       $err=sprintf("%d messages",count($msgs));
-       /*
-       foreach ($msgs as $k=>$val) {
-	 $this->mb_parseMessage($val);	
-	 }*/
+       $count=count($msgs);
+       if (! $justcount) {       
+	 $count=0;
+	 foreach ($msgs as $k=>$val) {
+	   $err=$this->mb_parseMessage($val);	
+	   if ($err=="") $count++;
+	   else addWarningMsg($err);
+	 }
+	 $this->AddComment(sprintf(_("%d messages transfered"),$count));
+       }
      } else {
        
        $err=sprintf(_("no new messages in imap %s folder"), $folder);
@@ -110,7 +114,9 @@ function mb_parseMessage($msg) {
   $this->msgStruct=array();
    $this->msgStruct["subject"]=$this->mb_decode($h->subject);
    $this->msgStruct["uid"]=$uid;
-   $this->msgStruct["date"]=$h->date;
+
+
+   $this->msgStruct["date"]=strftime("%Y-%m-%d %H:%M:%S",strtotime($h->date));;
    $this->msgStruct["to"]=$this->mb_implodemail($h->to);
    $this->msgStruct["from"]=$this->mb_implodemail($h->from);
    $this->msgStruct["cc"]=$this->mb_implodemail($h->cc);
@@ -118,18 +124,19 @@ function mb_parseMessage($msg) {
 
 
    //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
-   // $status = imap_setflag_full($this->mbox, $msg, '\\Flagged');
-   $status = imap_setflag_full($this->mbox, $msg, '$label3');
+    $status = imap_setflag_full($this->mbox, $msg, '\\Flagged');
+    //$status = imap_setflag_full($this->mbox, $msg, '$label3');
 
 
    $o=imap_fetchstructure($this->mbox,$msg);
-     print_r2($o);
+        print_r2($o);
    if ($o->subtype=="PLAIN") {
      $body=imap_body($this->mbox,$msg);
      $this->mb_bodydecode($o,$body);
      $this->msgStruct["textbody"]=$body;
    } else  if ($o->subtype=="HTML") {
      $body=imap_body($this->mbox,$msg);
+     $this->mb_bodydecode($o,$body);
      $this->msgStruct["htmlbody"]=$body;
      
    
@@ -141,10 +148,13 @@ function mb_parseMessage($msg) {
      }
      if ($o->parts[1]->subtype=="HTML") {
        $body=imap_fetchbody($this->mbox,$msg,'2');
+       $this->mb_bodydecode($o->parts[1],$body);
        $this->msgStruct["htmlbody"]=$body;       
      } else if ($o->parts[1]->subtype=="RELATED") {
        $this->mb_getmultipart($o->parts[1],$msg,'2.');
      } else if ($o->parts[1]->subtype=="MIXED") {
+       $this->mb_getmultipart($o->parts[1],$msg,'2.');
+     } else if ($o->parts[1]->subtype=="ALTERNATIVE") {
        $this->mb_getmultipart($o->parts[1],$msg,'2.');
      }
    } else if ($o->subtype=="MIXED") {
@@ -156,7 +166,8 @@ function mb_parseMessage($msg) {
 
 
    $this->mb_getcid($msg);
-   $this->mb_createMessage();
+   $err=$this->mb_createMessage();
+   return $err;
 
 }
 function mb_bodydecode($part,&$body) {
@@ -228,7 +239,7 @@ function mb_getmultipart($o,$msg,$chap="") {
 	   $this->msgStruct["file"][]=$filename;
 	   $this->msgStruct["basename"][]=$basename;
 	   // $this->msgStruct["cid"][]=$cid;
-	 } else  if ($part->subtype=="RELATED") {
+	 } else  if (($part->subtype=="RELATED")||($part->subtype=="ALTERNATIVE")) {
 	   print "<b>RELATED BIS</b><br>";
 	   $this->mb_getmultipart($part,$msg,sprintf("$chap%d.",$k+1));
 	 }
@@ -322,6 +333,7 @@ function mb_createMessage() {
 	}
       }
   } 
+  return $err;
 }
 
 

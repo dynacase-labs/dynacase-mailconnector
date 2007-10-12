@@ -1,0 +1,16 @@
+<table style="width:100%"><tr><td>
+[L_EMSG_FROM] : [V_EMSG_FROM]<br>
+[L_EMSG_DATE] : [V_EMSG_DATE]<br>
+[L_EMSG_SUBJECT] : <b>[V_EMSG_SUBJECT]</b>
+</td>
+<td>[V_EMSG_ATTACH]</td>
+<td style="text-align:right">[IF hasphoto]<img src="[photo]" style="width:64px">[ENDIF hasphoto]</td>
+
+</tr></table>
+<hr>
+[IF hashtml]
+[V_EMSG_HTMLBODY]
+[ENDIF hashtml]
+[IFNOT hashtml]
+[V_EMSG_TEXTBODY]
+[ENDIF hashtml]
