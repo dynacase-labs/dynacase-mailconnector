@@ -3,7 +3,7 @@
  * Test IMAP connection
  *
  * @author Anakeen 2007
- * @version $Id: mb_testconnection.php,v 1.1 2007/10/12 16:04:56 eric Exp $
+ * @version $Id: mb_testconnection.php,v 1.2 2007/10/15 16:28:23 eric Exp $
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @package FREEDOM
  * @subpackage 
@@ -31,7 +31,7 @@ function mb_testconnection(&$action) {
   
   $err=$doc->mb_connection();
   if ($err != "") {
-    $this->setValue("mb_connectedimage","mailbox_red.png");
+    $doc->setValue("mb_connectedimage","mailbox_red.png");
     $action->AddWarningMsg($err);
   } else  {    
     $doc->setValue("mb_connectedimage","mailbox_green.png");

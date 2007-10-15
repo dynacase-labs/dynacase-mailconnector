@@ -41,8 +41,11 @@ function mb_retrieveMessages(&$count,$justcount=false) {
 
   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
 
-  if (!imap_reopen($this->mbox,$fdir)) {
-    $err=sprintf(_("imap folder %s not found"), $folder);    
+  $err=$this->control("modify");
+  if ($err=="") {
+    if (!imap_reopen($this->mbox,$fdir)) {
+      $err=sprintf(_("imap folder %s not found"), $folder);    
+    }
   }
 
   if ($err=="") {     
@@ -70,7 +73,15 @@ function mb_retrieveMessages(&$count,$justcount=false) {
   return $err;
 
 }
+function postModify() {
+  $port=$this->getValue("mb_serverport");
+  $security=$this->getValue("mb_security");
+  if (($port=="") && ($security!="SSL")) $this->setValue("mb_serverport",143);
+  else if (($port=="") && ($security=="SSL")) $this->setValue("mb_serverport",993);
+  else if (($port=="143") && ($security=="SSL")) $this->setValue("mb_serverport",993);
+  else if (($port=="993") && ($security!="SSL")) $this->setValue("mb_serverport",143);
 
+}
 /**
  * utf7-decode workaround
  * delete parasite null character
@@ -310,7 +321,7 @@ function mb_createMessage() {
       if (! $msg->isAffected()) $err=$msg->Add();
 
       if ($err=="") {
-
+	$msg->disableEditControl();
 	if (is_array($this->msgStruct["file"])) {
 	  // Add attachments files
 	  $err=$msg->storeFiles('emsg_attach',$this->msgStruct["file"],$this->msgStruct["basename"]);

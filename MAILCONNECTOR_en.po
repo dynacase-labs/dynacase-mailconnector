@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WORKSPACE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-03-07 11:30+0100\n"
+"POT-Creation-Date: 2007-10-15 11:04+0200\n"
 "PO-Revision-Date: 2001-03-14 00:54-0500\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: english-anakeen <distrib@anakeen.com>\n"
@@ -15,58 +15,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "\n"
 
-msgid "Create User From LDAP"
-msgstr ""
-
-msgid "Search"
-msgstr ""
-
-msgid "Name or login"
-msgstr ""
-
-msgid "Result"
-msgstr ""
-
-msgid "Network users"
-msgstr ""
-
-msgid "Network users and LDAP authentification"
+#, c-format
+msgid "imap folder %s not found"
 msgstr ""
 
 #, c-format
-msgid "cannot create user %s: %s"
+msgid "%d messages transfered"
 msgstr ""
 
 #, c-format
-msgid "user %s not exists for FREEDOM"
+msgid "no new messages in imap %s folder"
+msgstr ""
+
+msgid "Mail connector"
+msgstr ""
+
+msgid "Copy messages from IMAP to freedom"
+msgstr ""
+
+msgid "test connection with IMAP server"
+msgstr ""
+
+msgid "retrieves messages from IMAP server"
 msgstr ""
 
 #, c-format
-msgid "Unable to bind to LDAP server %s"
+msgid "cannot see unknow reference %s"
+msgstr ""
+
+msgid "connection OK"
 msgstr ""
 
 #, c-format
-msgid "Unable to connect to LDAP server %s"
+msgid "%d messages transferred"
 msgstr ""
 
 #, c-format
-msgid "Cannot create LDAP %s [%s] : %s"
+msgid "%d messages to transferts"
 msgstr ""
 
-#, c-format
-msgid "Cannot find user [%s]"
+msgid "MB_To"
 msgstr ""
 
-#, c-format
-msgid "Find mutiple user with same id  [%s]"
-msgstr ""
-
-#, c-format
-msgid "Cannot find group [%s]"
-msgstr ""
-
-#, c-format
-msgid "Find mutiple grp with same login  [%s]"
+msgid "MB_Cc"
 msgstr ""
 
 msgid "host of the LDAP"

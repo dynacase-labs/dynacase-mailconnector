@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------
-// $Id: MAILCONNECTOR.app,v 1.2 2007/10/12 16:04:56 eric Exp $
+// $Id: MAILCONNECTOR.app,v 1.3 2007/10/15 16:28:23 eric Exp $
 // $Source: /home/cvsroot/anakeen/freedom/mailconnector/MAILCONNECTOR.app,v $
 // ---------------------------------------------------------------
 //  O   Anakeen - 2001
@@ -27,9 +27,9 @@ $app_desc = array (
 		   "short_name"	=>N_("Mail connector"),    	//Short name
 		   "description"=>N_("Copy messages from IMAP to freedom"),  //long description
 		   "access_free"=>"Y",			//Access free ? (Y,N)
-		   "icon"	=>"mailconnector.png",	//Icon
+		   "icon"	=>"mailbox.png",	//Icon
 		   "displayable"=>"N",			//Should be displayed on an app list (Y,N)
-		   "with_frame"	=>"N",			//Use multiframe ? (Y,N)
+		   "with_frame"	=>"Y",			//Use multiframe ? (Y,N)
 		   "childof"	=>""		        // instance of FREEDOM GENERIC application	
 		   );
 
@@ -40,8 +40,17 @@ $action_desc = array (
 			    "short_name" =>N_("test connection with IMAP server")),
 		      array( 
 			    "name" => "MB_RETRIEVEMESSAGES", 
-			    "short_name" =>N_("retrieves messages from IMAP server"))
-		      )
+			    "short_name" =>N_("retrieves messages from IMAP server")),		      
+		      array( 
+			    "name" => "ADMIN", 
+			    "short_name" =>N_("View and create new mailboxes")),		      
+		      array( 
+			    "name" => "APPPREFS",			    
+			    "script"             =>"admin.php",
+			    "function"           =>"mymailbox",
+			    "layout"           =>"admin.xml",
+			    "short_name" =>N_("View my mailboxes"))
+		      );
 
 
 		

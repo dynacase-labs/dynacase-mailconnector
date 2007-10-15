@@ -29,6 +29,35 @@ function viewemessage($target="_self",$ulink=true,$abstract=false) {
 
   $this->lay->set("hashtml",$hashtml);
   
+  $this->lay->set("TO",false);
+  $this->lay->set("CC",false);
+
+  $recips=$this->getTValue("emsg_recipient");
+  $reciptype=$this->getTValue("emsg_sendtype");
+  $tto=array();
+  $tcc=array();
+  foreach ($recips as $k=>$addr) {
+    $addr=str_replace(array("<",">"),array("&lt;","&gt;"),$addr);
+    if ($reciptype[$k]=="cc") $tcc[]=$addr;
+    else $tto[]=$addr;
+  }
+
+  if (count($tto)>0) {
+    $this->lay->set("TO",implode("; ",$tto));
+  }
+  if (count($tcc)>0) {
+    $this->lay->set("CC",implode("; ",$tcc));
+  }
+  
+
+}
+
+/**
+ * force no edition
+ */
+function control($aclname) {
+  if ($aclname=="edit") return _("electronic messages cannot be modified");
+  else return parent::control($aclname);
 }
 
 ?>
