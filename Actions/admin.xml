@@ -1,34 +1,10 @@
 [ZONE FDL:HTMLHEAD]
 <style>
-DIV.dspaces {
-  float:left;
-  width:250px;
-  height:120px;
-  -moz-border-radius:5px;
-  overflow:hidden;
-  text-align:center;
-  margin:1px;
-  background-color:[COLOR_A9];
+
+TR.mailbox {
+  cursor:pointer;empty-cells: show;
 }
-DIV.ddspaces {
-  cursor:pointer;
-  width:250px;
-  height:110px;
-  display:inline; 
-  border : solid 1px
-}
-DIV.ddspaces:hover {
-  background-color:[COLOR_C7];
-}
-DIV.ddspaces img{
-  width:[SIZE_IMG-MEDIUM];
-}
-DIV.dspacesselect,DIV.dspacesselect:hover {
-  margin:0px;
-  background-color:[COLOR_B7];
-  border : inset 1px;
-}
-DIV.dspacesselect:hover {
+TR.mailbox:hover {
   background-color:[COLOR_B7];
 }
 </style>
@@ -66,14 +42,13 @@ function createspace(event,o) {
   
 }
 </script>
-<div class="dspaces" onclick="createspace(event,this)">
-<div class="ddspaces"><img src="[ficon]"></div>
-<br><b>[TEXT:Create new mailbox]</b></div> 
+<a onclick="createspace(event,this)"><img needresize="1" width="[SIZE_IMG-X-SMALL]" src="[ficon]">[TEXT:Create new mailbox]</a>
+<table>
+<tr onclick="selectspace(event,this,'[id]')"><th>[TEXT:Mailbox Name]</th><th>[TEXT:IMAP Server]</th><th>[TEXT:Folder]</th></tr>
 [BLOCK SPACES]
-<div class="dspaces" onclick="selectspace(event,this,'[id]')">
-<div class="ddspaces"><img  src="[ICON]">[ba_title]</div>
-<br>&nbsp;[mb_login]@[mb_servername]<br><img width="20px" needresize="1" src="[IMG:folder.png]">[mb_folder]</div> 
+<tr class="mailbox" onclick="selectspace(event,this,'[id]')"><td>[ba_title]</td><td>[mb_login]@[mb_servername]</td><td><img width="20px" needresize="1" src="[IMG:folder.png]">[mb_folder]</td></tr>
 [ENDBLOCK SPACES]
+</table>
 <br style="clear:both">
 <iframe style="border:none;margin:0px;padding:0px;width:100%;height:550px" id="ieditspace"></iframe>
 [ZONE FDL:HTMLFOOT]

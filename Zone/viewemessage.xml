@@ -1,14 +1,16 @@
 <script>
 function resizeHIurl(iurl) {
   var eiurl=document.getElementById(iurl);
-  var xy=getAnchorPosition(iurl);
-  var hiurl=getFrameHeight();
-  //var wiurl=getFrameWidth();
-  var nh=hiurl - xy.y - 30; // offset for scrollbar
-  // alert(xy.y+'--'+hiurl+'--'+nh);
-  
-  eiurl.height=nh;
-  //eiurl.width=wiurl-50;
+  if (eiurl) {
+    var xy=getAnchorPosition(iurl);
+    var hiurl=getFrameHeight();
+    //var wiurl=getFrameWidth();
+    var nh=hiurl - xy.y - 30; // offset for scrollbar
+    // alert(xy.y+'--'+hiurl+'--'+nh);
+    
+    eiurl.height=nh;
+    //eiurl.width=wiurl-50;
+  }
  }
 
 addEvent(window,"load",function z() {resizeHIurl('ifile');});

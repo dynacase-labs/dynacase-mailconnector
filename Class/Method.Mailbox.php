@@ -1,13 +1,30 @@
 <?php
 
 public $mbox;
-function specRefresh2() {
 
-    $err=$this->mb_connection();
-         if ($err=="")  $err=$this->mb_retrieveMessages();
+function postcreated() {
+  $err=$this->mb_setProfil();
   return $err;
 
 }
+
+/**
+ * set personnal profil by default
+ */
+function mb_setProfil() {
+  $pp=getMyProfil($this->dbaccess);
+
+  if ($pp->isAlive()) {
+    $this->setValue("fld_pdocid",$pp->id);
+    $this->setValue("fld_pdirid",$pp->id);
+    $this->setProfil($pp->id);
+    $err=$this->modify();
+  }
+
+  return $err;
+  
+}
+
 function mb_connection() {
   include_once("FDL/Lib.Vault.php");
   $login=$this->getValue("mb_login");
@@ -338,7 +355,7 @@ function mb_createMessage() {
 
 
 	$err=$msg->Modify();
-     
+	print "WC1:".$doc->withoutControl;
 	if ($err=="") {
 	  $this->addFile($msg->id);
 	}

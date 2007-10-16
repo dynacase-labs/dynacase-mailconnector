@@ -3,7 +3,7 @@
  * Display mailboxes
  *
  * @author Anakeen 2006
- * @version $Id: admin.php,v 1.1 2007/10/15 16:28:23 eric Exp $
+ * @version $Id: admin.php,v 1.2 2007/10/16 14:35:03 eric Exp $
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @package FREEDOM
  * @subpackage 
@@ -25,7 +25,8 @@ function admin(&$action,$onlymy=false) {
   $dbaccess = $action->GetParam("FREEDOM_DB");
 
   $fdoc=new_doc($dbaccess,"MAILBOX");
-  
+  $action->parent->AddJsRef($action->GetParam("CORE_JSURL")."/resizeimg.js");
+
 
 
   $filter=array();
