@@ -2,7 +2,8 @@
 <style>
 
 TR.mailbox {
-  cursor:pointer;empty-cells: show;
+  cursor:pointer;
+  empty-cells: show;
 }
 TR.mailbox:hover {
   background-color:[COLOR_B7];

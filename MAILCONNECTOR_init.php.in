@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------
-// $Id: MAILCONNECTOR_init.php.in,v 1.1 2007/10/08 15:41:17 eric Exp $
+// $Id: MAILCONNECTOR_init.php.in,v 1.2 2007/10/17 15:44:17 eric Exp $
 // $Source: /home/cvsroot/anakeen/freedom/mailconnector/MAILCONNECTOR_init.php.in,v $
 // ---------------------------------------------------------------
 //  O   Anakeen - 2001
@@ -27,26 +27,11 @@ global $app_const;
 $app_const= array(
 		  "INIT" => "yes",
 		  "VERSION" => "@VERSION@-@RELEASE@",
-		  "NU_LDAP_HOST"    =>array("val"=>"",
-				       "descr"=>N_("host of the LDAP"),
-				       "global"=>"Y",
-				       "user"=>"N"),
-		  "NU_LDAP_BASE"    =>array("val"=>"",
-				       "descr"=>N_("base path of LDAP"),
-				       "global"=>"Y",
-				       "user"=>"N"),
-		  "NU_LDAP_BINDDN"    =>array("val"=>"",
-					 "descr"=>N_("DN of user which can access of all user and group of the LDAP"),
-					 "global"=>"Y",
-					 "user"=>"N"),
-		  "NU_LDAP_PASSWORD"    =>array("val"=>"",
-					   "global"=>"Y",
-					   "descr"=>N_("password of the DN"),
-					   "user"=>"N"),
-		  "NU_LDAP_KIND"    =>array("val"=>"",
-					   "global"=>"Y",
-					   "descr"=>N_("kind of users LDAP for authentification"),
-					   "kind"=>"enum(AD|POSIX)")
+		  "MB_TIMEOUT"    =>array("val"=>"5",
+					  "descr"=>N_("timeout in second for waiting connection"),
+					  "global"=>"Y",
+					  "user"=>"N")
+		  
 		  );
 
 ?>

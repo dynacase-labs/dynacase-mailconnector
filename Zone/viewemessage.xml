@@ -26,11 +26,11 @@ TABLE.transparent TD {
 <div style="background-color:[COLOR_A9];border:1px outset">
 <table class="transparent" cellspacing="0" cellpadding="0"  width="100%" ><tr><td style="vertical-align:top" >
 <table class="transparent"  cellspacing="0" cellpadding="0">
-<tr <td style="text-align:right">[L_EMSG_FROM] :&nbsp;</td><td> [V_EMSG_FROM]</td></tr>
-<tr><td style="text-align:right">[L_EMSG_DATE] :&nbsp;</td><td> [V_EMSG_DATE]</td></tr>
-<tr><td style="text-align:right">[L_EMSG_SUBJECT] :&nbsp;</td><td><b> [V_EMSG_SUBJECT]</b></td></tr>
-[IF TO]<tr><td style="text-align:right">[TEXT:MB_To] :&nbsp;</td><td> [TO]</td></tr>[ENDIF TO]
-[IF CC]<tr><td style="text-align:right">[TEXT:MB_Cc] :&nbsp;</td><td> [CC]</td></tr>[ENDIF CC]
+<tr <td style="text-align:right">[L_EMSG_FROM]&nbsp;:&nbsp;</td><td> [V_EMSG_FROM]</td></tr>
+<tr><td style="text-align:right">[L_EMSG_DATE]&nbsp;:&nbsp;</td><td> [V_EMSG_DATE]</td></tr>
+<tr><td style="text-align:right">[L_EMSG_SUBJECT]&nbsp;:&nbsp;</td><td><b> [V_EMSG_SUBJECT]</b></td></tr>
+[IF TO]<tr><td style="text-align:right">[TEXT:MB_To]&nbsp;:&nbsp;</td><td> [TO]</td></tr>[ENDIF TO]
+[IF CC]<tr><td style="text-align:right">[TEXT:MB_Cc]&nbsp;:&nbsp;</td><td> [CC]</td></tr>[ENDIF CC]
 </table>
 </td><td style="vertical-align:top">
 [V_EMSG_ATTACH]

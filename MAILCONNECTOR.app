@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------
-// $Id: MAILCONNECTOR.app,v 1.3 2007/10/15 16:28:23 eric Exp $
+// $Id: MAILCONNECTOR.app,v 1.4 2007/10/17 15:44:17 eric Exp $
 // $Source: /home/cvsroot/anakeen/freedom/mailconnector/MAILCONNECTOR.app,v $
 // ---------------------------------------------------------------
 //  O   Anakeen - 2001
@@ -43,7 +43,10 @@ $action_desc = array (
 			    "short_name" =>N_("retrieves messages from IMAP server")),		      
 		      array( 
 			    "name" => "ADMIN", 
-			    "short_name" =>N_("View and create new mailboxes")),		      
+			    "short_name" =>N_("View and create new mailboxes")),
+		      array( 
+			    "name" => "VERIFYMAIL", 
+			    "short_name" =>N_("Service for verify new mail")),		      
 		      array( 
 			    "name" => "APPPREFS",			    
 			    "script"             =>"admin.php",

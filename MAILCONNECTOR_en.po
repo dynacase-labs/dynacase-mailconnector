@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WORKSPACE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-15 11:04+0200\n"
+"POT-Creation-Date: 2007-10-17 17:38+0200\n"
 "PO-Revision-Date: 2001-03-14 00:54-0500\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: english-anakeen <distrib@anakeen.com>\n"
@@ -14,6 +14,24 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "\n"
+
+msgid "Mail connector"
+msgstr ""
+
+msgid "Copy messages from IMAP to freedom"
+msgstr ""
+
+msgid "test connection with IMAP server"
+msgstr ""
+
+msgid "retrieves messages from IMAP server"
+msgstr ""
+
+msgid "View and create new mailboxes"
+msgstr ""
+
+msgid "View my mailboxes"
+msgstr ""
 
 #, c-format
 msgid "imap folder %s not found"
@@ -27,16 +45,10 @@ msgstr ""
 msgid "no new messages in imap %s folder"
 msgstr ""
 
-msgid "Mail connector"
+msgid "electronic messages cannot be modified"
 msgstr ""
 
-msgid "Copy messages from IMAP to freedom"
-msgstr ""
-
-msgid "test connection with IMAP server"
-msgstr ""
-
-msgid "retrieves messages from IMAP server"
+msgid "Service for verify new mail"
 msgstr ""
 
 #, c-format
@@ -54,23 +66,52 @@ msgstr ""
 msgid "%d messages to transferts"
 msgstr ""
 
+msgid "no new messages"
+msgstr ""
+
+msgid "one new message"
+msgstr ""
+
+#, c-format
+msgid "%s new messages"
+msgstr ""
+
+#, c-format
+msgid "exchange mailboxes  -%d-"
+msgstr ""
+
+msgid "timeout in second for waiting connection"
+msgstr ""
+
 msgid "MB_To"
 msgstr ""
 
 msgid "MB_Cc"
 msgstr ""
 
-msgid "host of the LDAP"
+msgid "Create new mailbox"
 msgstr ""
 
-msgid "base path of LDAP"
+msgid "Mailbox Name"
 msgstr ""
 
-msgid "DN of user which can access of all user and group of the LDAP"
+msgid "IMAP Server"
 msgstr ""
 
-msgid "password of the DN"
+msgid "Folder"
 msgstr ""
 
-msgid "kind of users LDAP for authentification"
+msgid "No mailboxes"
+msgstr ""
+
+msgid "open it in a new window"
+msgstr ""
+
+msgid "Retreive messages"
+msgstr ""
+
+msgid "Transfert"
+msgstr ""
+
+msgid "View only first five"
 msgstr ""

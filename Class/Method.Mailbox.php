@@ -4,10 +4,21 @@ public $mbox;
 
 function postcreated() {
   $err=$this->mb_setProfil();
-  return $err;
+  if ($err=="") {
+    $home=$this->getHome();
+    if ($home) $home->AddFile($this->id);
+  }
 
+  return $err;
 }
 
+function specRefresh2() {
+  $err=$this->mb_connection();
+    if ($err=="") {
+      $err=$this->mb_retrieveSubject($count,$subjects);
+      print_r2($subjects);
+    }
+}
 /**
  * set personnal profil by default
  */
@@ -40,7 +51,7 @@ function mb_connection() {
   $this->imapconnection=$this->fimap."INBOX";
   
   //  print_r2($this->imapconnection);
-  imap_timeout(1,5); // 5 seconds
+  imap_timeout(1,getParam("MB_TIMEOUT",5)); // 5 seconds
   $this->mbox = @imap_open($this->imapconnection,$login ,$password );
   if (!$this->mbox) {
     $err=imap_last_error();
@@ -60,33 +71,71 @@ function mb_retrieveMessages(&$count,$justcount=false) {
 
   $err=$this->control("modify");
   if ($err=="") {
-    if (!imap_reopen($this->mbox,$fdir)) {
+    if (!@imap_reopen($this->mbox,$fdir)) {
       $err=sprintf(_("imap folder %s not found"), $folder);    
     }
   }
 
   if ($err=="") {     
-     $msgs = imap_search($this->mbox,'UNFLAGGED' );
-     if (is_array($msgs)) {
-       $count=count($msgs);
-       if (! $justcount) {       
-	 $count=0;
-	 foreach ($msgs as $k=>$val) {
-	   $err=$this->mb_parseMessage($val);	
-	   if ($err=="") $count++;
-	   else addWarningMsg($err);
-	 }
-	 $this->AddComment(sprintf(_("%d messages transfered"),$count));
-       }
-     } else {
-       
-       $err=sprintf(_("no new messages in imap %s folder"), $folder);
-     }
+    $msgs = imap_search($this->mbox,'UNFLAGGED' );
+    if (is_array($msgs)) {
+      $count=count($msgs);       
+      if (! $justcount) {
+	$count=0;
+	foreach ($msgs as $k=>$val) {
+	  $err=$this->mb_parseMessage($val);	
+	  if ($err=="") $count++;
+	  else addWarningMsg($err);
+	}
+	$this->AddComment(sprintf(_("%d messages transfered"),$count));
+      }       
+    } else {
+      $count=0;
+      //$err=sprintf(_("no new messages in imap %s folder"), $folder);
+    }     
+  }
+  @imap_close($this->mbox);
+  
+  return $err;
+
+}
+/**
+ * retrieve subject of unflagged messages from specific folder
+ * @param int  &$count return number of messages transffered
+ * @param bool $justcount set ti true to just return number of messages
+ */
+function mb_retrieveSubject(&$count,&$subject,$limit=5) {   
+  $folder=$this->getValue("mb_folder","INBOX");
+
+  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+
+  if (!@imap_reopen($this->mbox,$fdir)) {
+    $err=sprintf(_("imap folder %s not found"), $folder);    
+  }
+
+  if ($err=="") {     
+    $msgs = imap_search($this->mbox,'UNFLAGGED' );
+    if (is_array($msgs)) {
+      $count=count($msgs);       
+      $c=0;
+      $seq=array();
+      while (($c<$limit) && ($c<$count)) {
+	$seq[]=$msgs[$c];
+	$c++;
+      }
+      $sseq=implode(",",$seq);    
+      $over=imap_fetch_overview($this->mbox,$sseq);
+      $subject=array();
+      foreach ($over as $k=>$v) {
+	$subject[]=$this->mb_decode($v->subject);
+      }
+    } else {
+      $count=0;
+    }
      
   }
-  imap_close($this->mbox);
+  @imap_close($this->mbox);
   
-
   return $err;
 
 }
@@ -99,17 +148,7 @@ function postModify() {
   else if (($port=="993") && ($security!="SSL")) $this->setValue("mb_serverport",143);
 
 }
-/**
- * utf7-decode workaround
- * delete parasite null character
- * @return string iso8859-1
- */
-static function imap_utf7_decode_zero($s) {
-  print "[$s]";
-  $s=imap_utf7_decode($s);
-  $s=str_replace("\0","",$s);
-  return $s;
-}
+
 /**
  * decode headers text
  * @param string $s encoded text
@@ -128,7 +167,7 @@ static function mb_decode($s) {
 
 
 function mb_parseMessage($msg) {
-  print "<hr>";
+  //print "<hr>";
   
   $h= imap_header($this->mbox,$msg);
   $uid=$h->message_id;
@@ -157,7 +196,7 @@ function mb_parseMessage($msg) {
 
 
    $o=imap_fetchstructure($this->mbox,$msg);
-        print_r2($o);
+   //   print_r2($o);
    if ($o->subtype=="PLAIN") {
      $body=imap_body($this->mbox,$msg);
      $this->mb_bodydecode($o,$body);
@@ -235,17 +274,12 @@ function mb_getmultipart($o,$msg,$chap="") {
 	 $this->msgStruct["textbody"]=$body;
        } else  if ($part->subtype=="HTML") {
 	 $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
-	 switch ($part->encoding) {
-	 case 4: // QUOTED-PRINTABLE
-	     $body=quoted_printable_decode($body);
-	     break;
-	 }	 
+	 	 
+	 $this->mb_bodydecode($part,$body);
 	 $this->msgStruct["htmlbody"]=$body;       
        } else {
 	 $part->disposition=strtoupper($part->disposition);
 	 if (($part->disposition=="INLINE")||($part->disposition=="ATTACHMENT")) {
-
-	   print "<h1>".sprintf("$chap%d",$k+1)."</h1>";
 	   $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
 	   
 	   $this->mb_bodydecode($part,$body);
@@ -268,7 +302,6 @@ function mb_getmultipart($o,$msg,$chap="") {
 	   $this->msgStruct["basename"][]=$basename;
 	   // $this->msgStruct["cid"][]=$cid;
 	 } else  if (($part->subtype=="RELATED")||($part->subtype=="ALTERNATIVE")) {
-	   print "<b>RELATED BIS</b><br>";
 	   $this->mb_getmultipart($part,$msg,sprintf("$chap%d.",$k+1));
 	 }
        }
@@ -355,7 +388,7 @@ function mb_createMessage() {
 
 
 	$err=$msg->Modify();
-	print "WC1:".$doc->withoutControl;
+
 	if ($err=="") {
 	  $this->addFile($msg->id);
 	}
