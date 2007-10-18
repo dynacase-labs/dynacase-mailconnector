@@ -30,7 +30,7 @@ function verifymail(&$action) {
       $err=$v->mb_retrieveSubject($count,$subjects);
     }
     $tsubj=array();
-    foreach ($subjects as $v) $tsubj[]=array("subject"=>$v);
+    if ($count>0) foreach ($subjects as $v) $tsubj[]=array("subject"=>$v);
     $tdoc[$k]["subjects"]="SUBJECT$k";
     $action->lay->setBlockData("SUBJECT$k", $tsubj);
     $tdoc[$k]["mesg"]="";

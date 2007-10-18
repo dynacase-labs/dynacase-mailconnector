@@ -1,5 +1,5 @@
 # ============================================
-# $Id: Makefile.in,v 1.4 2007/10/12 16:04:56 eric Exp $
+# $Id: Makefile.in,v 1.5 2007/10/18 12:50:59 eric Exp $
 # ============================================
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
@@ -18,7 +18,7 @@ SUBDIR= Class Actions Zone Images
 
 include $(utildir)/PubRule
 
-DISTFILES += $(SUBDIR) mailconnector.ods \
+DISTFILES += $(SUBDIR) mailconnector.ods mc_services.ods \
             RELEASE VERSION 
 
 $(pubdir)/EXTERNALS:
@@ -28,7 +28,7 @@ $(pubdir)/EXTERNALS/mailconnector.php : mailconnector.php
 	cd $(pubdir)/EXTERNALS; \
 	ln -s ../$(appname)/$< .
 
-$(pubdir)/$(appname)/mailconnector.ods : mailconnector.ods
+$(pubdir)/$(appname)/%.ods : %.ods
 	cp $< $(pubdir)/$(appname)
 
-publish: $(pubdir)/$(appname)/mailconnector.ods $(pubdir)/EXTERNALS $(pubdir)/EXTERNALS/mailconnector.php
+publish: $(pubdir)/$(appname)/mailconnector.ods $(pubdir)/$(appname)/mc_services.ods $(pubdir)/EXTERNALS $(pubdir)/EXTERNALS/mailconnector.php
