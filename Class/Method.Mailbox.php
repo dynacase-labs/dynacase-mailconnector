@@ -171,7 +171,7 @@ function mb_parseMessage($msg) {
   
   $h= imap_header($this->mbox,$msg);
   $uid=$h->message_id;
-  print "<b>".$this->mb_decode($h->subject)."</b> [$uid]";
+  //  print "<b>".$this->mb_decode($h->subject)."</b> [$uid]";
   
   if ($uid=="") $uid=$h->date.'-'.$h->Size;
   // print_r2($h);
