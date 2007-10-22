@@ -12,11 +12,19 @@ function postcreated() {
   return $err;
 }
 
-function specRefresh2() {
+function specRefresh() {
+  if ($this->id == 0) {
+    $oa=$this->getAttribute("mb_folder");
+    $oa->mvisibility='S'; // need test connection before
+  }
+  return   $this->test();
+}
+function test() {
   $err=$this->mb_connection();
-    if ($err=="") {
-      $err=$this->mb_retrieveSubject($count,$subjects);
-      print_r2($subjects);
+
+
+    if ($err=="") { 
+      $this->mb_recursiveRetrieveMessages();
     }
 }
 /**
@@ -62,9 +70,8 @@ function mb_connection() {
 /**
  * retrieve unflagged messages from specific folder
  * @param int  &$count return number of messages transffered
- * @param bool $justcount set ti true to just return number of messages
  */
-function mb_retrieveMessages(&$count,$justcount=false) {   
+function mb_retrieveMessages(&$count) {   
   $folder=$this->getValue("mb_folder","INBOX");
 
   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
@@ -79,8 +86,8 @@ function mb_retrieveMessages(&$count,$justcount=false) {
   if ($err=="") {     
     $msgs = imap_search($this->mbox,'UNFLAGGED' );
     if (is_array($msgs)) {
-      $count=count($msgs);       
-      if (! $justcount) {
+        
+      
 	$count=0;
 	foreach ($msgs as $k=>$val) {
 	  $err=$this->mb_parseMessage($val);	
@@ -88,7 +95,7 @@ function mb_retrieveMessages(&$count,$justcount=false) {
 	  else addWarningMsg($err);
 	}
 	$this->AddComment(sprintf(_("%d messages transfered"),$count));
-      }       
+          
     } else {
       $count=0;
       //$err=sprintf(_("no new messages in imap %s folder"), $folder);
@@ -237,6 +244,13 @@ function mb_parseMessage($msg) {
    return $err;
 
 }
+
+/**
+ * decode part of mail
+ * @param stdClass $part part object from imap_fetchstructure
+ * @param string &$body the message to decode
+ * 
+ */
 function mb_bodydecode($part,&$body) {
   switch ($part->encoding) {
   case 3: // base64
@@ -249,7 +263,7 @@ function mb_bodydecode($part,&$body) {
   case 2: //Binary
     break;
   case 4: // QUOTED-PRINTABLE
-    $body=(quoted_printable_decode($body));
+    $body=quoted_printable_decode($body);
     break;
   case 5: // Others
     break;
@@ -261,6 +275,14 @@ function mb_bodydecode($part,&$body) {
   }
 
 }
+
+/**
+ * analyse multipart of mail
+ * @param stdClass $o part object from imap_fetchstructure
+ * @param int $msg the message identificator from imap_search
+ * @param string $chap index of chapter like 2.3
+ * 
+ */
 function mb_getmultipart($o,$msg,$chap="") {
    foreach ($o->parts as $k=>$part) {
 
@@ -333,6 +355,7 @@ function mb_createMessage() {
 
   $uid=pg_escape_string($this->msgStruct["uid"]);
   $filter[]="emsg_uid='$uid'";
+  $filter[]="emsg_mailboxid=".$this->initid;
   $tdir=getChildDoc($this->dbaccess,0,"0",1,$filter,1,"LIST","EMESSAGE");
   if (count($tdir)==0) {
     $msg=createdoc($this->dbaccess,"EMESSAGE");    
@@ -341,7 +364,7 @@ function mb_createMessage() {
   }
   //  print_r2($this->msgStruct);
   if ($msg) {
-      $msg->setValue("emsg_mailboxid",$this->id);
+      $msg->setValue("emsg_mailboxid",$this->initid);
       $msg->setValue("emsg_uid",$this->msgStruct["uid"]);
       $msg->setValue("emsg_subject",$this->msgStruct["subject"]);
       $msg->setValue("emsg_from",$this->msgStruct["from"]);
@@ -397,8 +420,21 @@ function mb_createMessage() {
   return $err;
 }
 
+function mb_recursiveRetrieveMessages() {
+  $folder=$this->getValue("mb_folder","INBOX");
+  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+  $folders = imap_list($this->mbox, $fdir, "*");
+  print_r2($folders);
+}
 
-function mb_replacid($msg,$docid) {
+/**
+ * for RELATED part
+ * convert cid: to local href
+ * @param string $msg clear text 
+ * @param docid $docid id of document message
+ * @return string the new text
+ */
+private function mb_replacid($msg,$docid) {
   $this->msgid=$docid;
     $out = preg_replace(
 		      '/"(cid:[^"]+)"/se', 
@@ -407,18 +443,23 @@ function mb_replacid($msg,$docid) {
     
     return $out;
 }
-function mb_getcid($msg) {
+
+/**
+ * 
+ * memorize cid references in $this->msgStruct["cid"]
+ */
+private function mb_getcid($msg) {
 
   $out = preg_replace('/Content-ID:\s*<([^\s]+)>/sei', 
 		      "\$this->mb_putcid('\\1')",
 		      imap_body($this->mbox,$msg) );
 }
 
-function mb_putcid($cid) {
+private function mb_putcid($cid) {
   $this->msgStruct["cid"][]=trim($cid);
 }
 
-function mb_cid2http($url) {
+private function mb_cid2http($url) {
   $cid=substr($url,4);
   $key = array_search($cid,$this->msgStruct["cid"] ); 
  

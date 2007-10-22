@@ -3,7 +3,7 @@
  *Retrieve messages from IMAP folder
  *
  * @author Anakeen 2007
- * @version $Id: mb_retrievemessages.php,v 1.1 2007/10/12 16:04:56 eric Exp $
+ * @version $Id: mb_retrievemessages.php,v 1.2 2007/10/22 15:25:05 eric Exp $
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @package FREEDOM
  * @subpackage 
@@ -36,7 +36,7 @@ function mb_retrievemessages(&$action) {
   } else  {    
     $doc->setValue("mb_connectedimage","mailbox_green.png");
     $action->AddWarningMsg(_("connection OK"));
-    $err=$doc->mb_retrieveMessages($count,false);
+    $err=$doc->mb_retrieveMessages($count);
     if ($err!="")   $action->AddWarningMsg($err);
     else $action->AddWarningMsg(sprintf(_("%d messages transferred"),$count));
   }
