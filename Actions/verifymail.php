@@ -24,6 +24,7 @@ function verifymail(&$action) {
   foreach ($ldoc as $k=>$v) {
     $tdoc[$k]=$v->getValues();
     $tdoc[$k]["id"]=$v->id;
+    $tdoc[$k]["title"]=$v->getTitle();
     $count=-1;
     $err=$v->mb_connection();
     if ($err=="") {
