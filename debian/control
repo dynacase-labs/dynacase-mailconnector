@@ -1,0 +1,13 @@
+Source: freedom-mailconnector
+Section: web
+Priority: extra
+Maintainer: yannick <yannick.lebriquer@anakeen.com>
+Build-Depends: debhelper (>= 5), autoconf
+Standards-Version: 3.7.2
+
+Package: freedom-mailconnector
+Architecture: all
+Depends: freedom-lib, freedom-what
+Description:  This package create 2 documents families:mailbox and "electronic messages". 
+The mailbox folder can transfert messages from IMAP folder messages to freedom folder.
+
