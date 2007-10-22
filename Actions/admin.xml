@@ -10,7 +10,21 @@ TR.mailbox:hover {
 }
 </style>
 <script>
+function resizeHIurl(iurl) {
+  var eiurl=document.getElementById(iurl);
+  if (eiurl) {
+    var xy=getAnchorPosition(iurl);
+    var hiurl=getFrameHeight();
+    //var wiurl=getFrameWidth();
+    var nh=hiurl - xy.y - 30; // offset for scrollbar
+    // alert(xy.y+'--'+hiurl+'--'+nh);
+    
+    eiurl.height=nh;
+    //eiurl.width=wiurl-50;
+  }
+ }
 
+addEvent(window,"load",function z() {resizeHIurl('ieditspace');});
 function selectspace(event,o,idspace) {
   var ifr=document.getElementById('ieditspace');
 
@@ -25,6 +39,7 @@ function selectspace(event,o,idspace) {
 
   //  ifr.src='[CORE_STANDURL]&app=GENERIC&action=GENERIC_EDIT&id='+idspace;
   ifr.src='[CORE_STANDURL]&app=FDL&action=FDL_CARD&id='+idspace;
+  resizeHIurl('ieditspace');
   
 }
 function createspace(event,o) {
@@ -51,5 +66,5 @@ function createspace(event,o) {
 [ENDBLOCK SPACES]
 </table>
 <br style="clear:both">
-<iframe style="border:none;margin:0px;padding:0px;width:100%;height:550px" id="ieditspace"></iframe>
+<iframe style="border:none;margin:0px;padding:0px;width:100%;" id="ieditspace"></iframe>
 [ZONE FDL:HTMLFOOT]
