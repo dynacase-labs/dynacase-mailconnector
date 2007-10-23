@@ -3,7 +3,7 @@
  * Test IMAP connection
  *
  * @author Anakeen 2007
- * @version $Id: mb_testconnection.php,v 1.3 2007/10/22 15:25:05 eric Exp $
+ * @version $Id: mb_testconnection.php,v 1.4 2007/10/23 15:30:39 eric Exp $
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  * @package FREEDOM
  * @subpackage 
@@ -36,7 +36,7 @@ function mb_testconnection(&$action) {
   } else  {    
     $doc->setValue("mb_connectedimage","mailbox_green.png");
     $action->AddWarningMsg(_("connection OK"));
-    $err=$doc->mb_retrieveSubject($count,$nothing,0); // just count
+    $err=$doc->mb_retrieveSubject($count,$nothing); // just count
     if ($err!="")   $action->AddWarningMsg($err);
     else $action->AddWarningMsg(sprintf(_("%d messages to transferts"),$count));
   }

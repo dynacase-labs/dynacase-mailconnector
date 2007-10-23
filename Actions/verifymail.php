@@ -29,6 +29,7 @@ function verifymail(&$action) {
     $err=$v->mb_connection();
     if ($err=="") {
       $err=$v->mb_retrieveSubject($count,$subjects);
+      $v->mb_close();
     }
     $tsubj=array();
     if ($count>0) foreach ($subjects as $v) $tsubj[]=array("subject"=>$v);

@@ -71,20 +71,19 @@ function mb_retrieveMessages(&$count,$fdir="") {
 /**
  * retrieve unflagged messages from specific folder (not recursive)
  * @param int  &$count return number of messages transffered
+ * @param string $fdir imap sub folder
  */
 function mb_retrieveFolderMessages(&$count,$fdir="") {   
   if ($fdir=="") {
    $folder=$this->getValue("mb_folder","INBOX");
    $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
   }
-  print "<br>mb_retrieveMessages :$fdir";
+
   $err=$this->control("modify");
   if ($err=="") {
     if (!@imap_reopen($this->mbox,$fdir)) {
       $err=sprintf(_("imap folder %s not found : %s"), $folder,imap_last_error());    
-    } else {
-      print "reopen $fdir";
-    }
+    } 
   }
 
   if ($err=="") {     
@@ -110,16 +109,39 @@ function mb_retrieveFolderMessages(&$count,$fdir="") {
 function mb_close() {
   @imap_close($this->mbox);
 }
+
+/**
+ * retrieve subject of unflagged messages from specific folder
+ * @param int  &$count return number of messages transffered
+ * @param bool $justcount set to true to just return number of messages
+ */
+function mb_retrieveSubject(&$count,&$subject,$limit=5) {   
+  if ($this->getValue("mb_recursive")=="yes") {
+    $folder=$this->getValue("mb_folder","INBOX");
+    $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+    $folders = imap_list($this->mbox, $fdir, "*");
+    $count=0;
+    foreach ($folders as $k=>$subfld) {
+      $this->mb_retrieveFolderSubject($subcount,$subsubject,$limit-$count,$subfld);
+      $count+=$subcount;
+      $subject=array_merge($subject,$subsubject);
+    }    
+  } else {
+    $this->mb_retrieveFolderSubject($count,$subject,$limit);  
+  }
+} 
 /**
  * retrieve subject of unflagged messages from specific folder
  * @param int  &$count return number of messages transffered
  * @param bool $justcount set ti true to just return number of messages
  */
-function mb_retrieveSubject(&$count,&$subject,$limit=5) {   
-  $folder=$this->getValue("mb_folder","INBOX");
-
-  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
-
+function mb_retrieveFolderSubject(&$count,&$subject,$limit=5,$fdir="") {  
+  if ($fdir=="") {
+   $folder=$this->getValue("mb_folder","INBOX");
+   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+  } 
+  
+  $subject=array();
   if (!@imap_reopen($this->mbox,$fdir)) {
     $err=sprintf(_("imap folder %s not found"), $folder);    
   }
@@ -136,7 +158,7 @@ function mb_retrieveSubject(&$count,&$subject,$limit=5) {
       }
       $sseq=implode(",",$seq);    
       $over=imap_fetch_overview($this->mbox,$sseq);
-      $subject=array();
+      
       foreach ($over as $k=>$v) {
 	$subject[]=$this->mb_decode($v->subject);
       }
@@ -144,9 +166,7 @@ function mb_retrieveSubject(&$count,&$subject,$limit=5) {
       $count=0;
     }
      
-  }
-  @imap_close($this->mbox);
-  
+  }  
   return $err;
 
 }
@@ -435,7 +455,6 @@ function mb_recursiveRetrieveMessages(&$count) {
   $folder=$this->getValue("mb_folder","INBOX");
   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
   $folders = imap_list($this->mbox, $fdir, "*");
-  // print_r2($folders);
 
   $this->mb_retrieveFolderMessages($count); // main folder
   if (count($folders)>0) {
@@ -445,8 +464,6 @@ function mb_recursiveRetrieveMessages(&$count) {
     $subfolders=getChildDoc($this->dbaccess,0,"0","ALL",$filter,1,"TABLE","SUBMAILBOX");
     $subtitle=array();
     foreach ($subfolders as $ids=>$dsub) $subtitle[$dsub["initid"]]=$dsub["smb_path"];
-
-    //print_r2($subtitle);
 
     unset($folders[0]);
     foreach ($folders as $k=>$subfld) {      
@@ -471,7 +488,7 @@ function mb_recursiveRetrieveMessages(&$count) {
 	    $pfld->addFile($sub->initid);
 	  } else $this->addFile($sub->initid);
 	  $this->setDestFolder($sub->initid);
-	  $subtitle[$sub->initid]=$f;
+	  $subtitle[$sub->initid]=$futf7;
 	}
       } else {
 	$this->destFolder=$subfolders[0];
@@ -545,5 +562,9 @@ private function getDestFolder() {
   if (! $this->destFolderId) return $this;
   $this->destFolder=new_doc($this->dbaccess,$this->destFolderId);
   return $this->destFolder;
+}
+
+function mb_isRecursive() {  
+  return ($this->getValue("mb_recursive")=="yes")?MENU_ACTIVE:MENU_INVISIBLE;
 }
 ?>
