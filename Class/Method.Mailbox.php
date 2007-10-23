@@ -17,16 +17,9 @@ function specRefresh() {
     $oa=$this->getAttribute("mb_folder");
     $oa->mvisibility='S'; // need test connection before
   }
-  return   $this->test();
+  
 }
-function test() {
-  $err=$this->mb_connection();
 
-
-    if ($err=="") { 
-      $this->mb_recursiveRetrieveMessages();
-    }
-}
 /**
  * set personnal profil by default
  */
@@ -71,23 +64,32 @@ function mb_connection() {
  * retrieve unflagged messages from specific folder
  * @param int  &$count return number of messages transffered
  */
-function mb_retrieveMessages(&$count) {   
-  $folder=$this->getValue("mb_folder","INBOX");
-
-  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
-
+function mb_retrieveMessages(&$count,$fdir="") { 
+  if ($this->getValue("mb_recursive")=="yes") $err=$this->mb_recursiveRetrieveMessages($count);
+  else $err=$this->mb_retrieveFolderMessages($count);
+}
+/**
+ * retrieve unflagged messages from specific folder (not recursive)
+ * @param int  &$count return number of messages transffered
+ */
+function mb_retrieveFolderMessages(&$count,$fdir="") {   
+  if ($fdir=="") {
+   $folder=$this->getValue("mb_folder","INBOX");
+   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+  }
+  print "<br>mb_retrieveMessages :$fdir";
   $err=$this->control("modify");
   if ($err=="") {
     if (!@imap_reopen($this->mbox,$fdir)) {
-      $err=sprintf(_("imap folder %s not found"), $folder);    
+      $err=sprintf(_("imap folder %s not found : %s"), $folder,imap_last_error());    
+    } else {
+      print "reopen $fdir";
     }
   }
 
   if ($err=="") {     
     $msgs = imap_search($this->mbox,'UNFLAGGED' );
-    if (is_array($msgs)) {
-        
-      
+    if (is_array($msgs)) {              
 	$count=0;
 	foreach ($msgs as $k=>$val) {
 	  $err=$this->mb_parseMessage($val);	
@@ -98,13 +100,15 @@ function mb_retrieveMessages(&$count) {
           
     } else {
       $count=0;
-      //$err=sprintf(_("no new messages in imap %s folder"), $folder);
     }     
-  }
-  @imap_close($this->mbox);
+  }  
   
   return $err;
 
+}
+
+function mb_close() {
+  @imap_close($this->mbox);
 }
 /**
  * retrieve subject of unflagged messages from specific folder
@@ -349,7 +353,9 @@ static function mb_implodemail($struct) {
   return implode(";",$tmail);
 }
 
-
+/**
+ * create electronic message document from $this->msgStruct
+ */
 function mb_createMessage() {
   include_once("FDL/Lib.Dir.php");
 
@@ -413,18 +419,71 @@ function mb_createMessage() {
 	$err=$msg->Modify();
 
 	if ($err=="") {
-	  $this->addFile($msg->id);
+	  $destFolder=$this->getdestFolder();
+	  $destFolder->addFile($msg->id);	  
 	}
       }
   } 
   return $err;
 }
-
-function mb_recursiveRetrieveMessages() {
+/**
+ * retrieve unflagged messages from specific folder and sub folders
+ * @param int  &$count return number of messages transffered
+ */
+function mb_recursiveRetrieveMessages(&$count) {
+  include_once("FDL/Lib.Dir.php");
   $folder=$this->getValue("mb_folder","INBOX");
   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
   $folders = imap_list($this->mbox, $fdir, "*");
-  print_r2($folders);
+  // print_r2($folders);
+
+  $this->mb_retrieveFolderMessages($count); // main folder
+  if (count($folders)>0) {
+  
+    $filter=array();
+    $filter[]="smb_mailboxid=".$this->initid;
+    $subfolders=getChildDoc($this->dbaccess,0,"0","ALL",$filter,1,"TABLE","SUBMAILBOX");
+    $subtitle=array();
+    foreach ($subfolders as $ids=>$dsub) $subtitle[$dsub["initid"]]=$dsub["smb_path"];
+
+    //print_r2($subtitle);
+
+    unset($folders[0]);
+    foreach ($folders as $k=>$subfld) {      
+      $isofld=mb_convert_encoding( $subfld, "ISO_8859-1", "UTF7-IMAP" ); 
+      $f=substr($isofld,strpos($isofld,'}')+1);
+      
+      $keysubfolder=array_search($f,$subtitle);
+      if (! $keysubfolder) {
+	// new sub folder : create it
+	$sub=createDoc($this->dbaccess,"SUBMAILBOX");
+	$sub->setValue("smb_path",$f);
+	$sub->setValue("ba_title",substr($f,strrpos($f,'.')+1));
+	$sub->setValue("smb_mailboxid",$this->initid);
+	$err=$sub->Add();
+	if ($err=="") {
+	  $futf7=substr($subfld,strpos($subfld,'}')+1);
+	  $pfutf7=substr($futf7,0,strrpos($futf7,'.'));
+	  $keypsubfolder=array_search($pfutf7,$subtitle);
+	  //	  print "parent [$pfutf7] [$futf7][$keypsubfolder]<br>";
+	  if ($keypsubfolder) {
+	    $pfld=new_doc($this->dbaccess,$keypsubfolder);
+	    $pfld->addFile($sub->initid);
+	  } else $this->addFile($sub->initid);
+	  $this->setDestFolder($sub->initid);
+	  $subtitle[$sub->initid]=$f;
+	}
+      } else {
+	$this->destFolder=$subfolders[0];
+	$this->setDestFolder($keysubfolder);
+      }
+      
+      $err=$this->mb_retrieveFolderMessages($subcount,$subfld);
+      //print "count:$count for $subfld <b>$err</b><br>";	
+      $count+=$subcount;
+    }
+  }
+  return $err;
 }
 
 /**
@@ -475,4 +534,16 @@ private function mb_cid2http($url) {
 	       $key);
   return ('"'.$url.'"');
 } 
+
+private function setDestFolder($folderid) {
+  $this->destFolderId=$folderid;
+}
+
+
+private function getDestFolder() {
+  if (isset($this->destFolder) && $this->destFolder->initid==$this->destFolderId) return $this->destFolder;
+  if (! $this->destFolderId) return $this;
+  $this->destFolder=new_doc($this->dbaccess,$this->destFolderId);
+  return $this->destFolder;
+}
 ?>
