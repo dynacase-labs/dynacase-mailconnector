@@ -47,11 +47,10 @@ function mb_connection() {
 
 
   if ($ssl=="SSL") $this->fimap=sprintf("{%s:%d/imap/ssl/novalidate-cert}",$server,$port);
-  else $this->fimap=sprintf("{%s:%d/imap/notls}",$server,$port);
-  
+  else $this->fimap=sprintf("{%s:%d/imap/notls}",$server,$port);  
+
   $this->imapconnection=$this->fimap."INBOX";
   
-  //  print_r2($this->imapconnection);
   imap_timeout(1,getParam("MB_TIMEOUT",5)); // 5 seconds
   $this->mbox = @imap_open($this->imapconnection,$login ,$password );
   if (!$this->mbox) {
@@ -110,6 +109,7 @@ function mb_close() {
   @imap_close($this->mbox);
 }
 
+
 /**
  * retrieve subject of unflagged messages from specific folder
  * @param int  &$count return number of messages transffered
@@ -121,7 +121,9 @@ function mb_retrieveSubject(&$count,&$subject,$limit=5) {
     $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
     $folders = imap_list($this->mbox, $fdir, "*");
     $count=0;
+    $subject=array();
     foreach ($folders as $k=>$subfld) {
+      $subsubject=array();
       $this->mb_retrieveFolderSubject($subcount,$subsubject,$limit-$count,$subfld);
       $count+=$subcount;
       $subject=array_merge($subject,$subsubject);
@@ -177,7 +179,6 @@ function postModify() {
   else if (($port=="") && ($security=="SSL")) $this->setValue("mb_serverport",993);
   else if (($port=="143") && ($security=="SSL")) $this->setValue("mb_serverport",993);
   else if (($port=="993") && ($security!="SSL")) $this->setValue("mb_serverport",143);
-
 }
 
 /**
