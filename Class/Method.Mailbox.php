@@ -540,7 +540,7 @@ private function mb_cid2http($url) {
   $cid=substr($url,4);
   $key = array_search($cid,$this->msgStruct["cid"] ); 
  
-  if (ereg ("(.*)\|(.*)",$this->msgStruct["cid"]["key"] , $reg)) {
+  if (ereg (REGEXPFILE,$this->msgStruct["cid"]["key"] , $reg)) {
     $vid=$reg[2];
     $mime=$reg[1];
   }
