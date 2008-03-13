@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: freedom-mailconnector
 Architecture: all
-Depends: freedom-lib, freedom-what
+Depends: freedom-lib (>= 2.9.1), freedom-what
 Description:  This package create 2 documents families:mailbox and "electronic messages". 
 The mailbox folder can transfert messages from IMAP folder messages to freedom folder.
 
