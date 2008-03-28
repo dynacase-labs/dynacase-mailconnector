@@ -1,7 +1,7 @@
 #! /bin/rpm
 #
 #  File: 
-#  $Id: freedom-mailconnector.spec.in,v 1.1 2008/03/28 10:35:25 eric Exp $
+#  $Id: freedom-mailconnector.spec.in,v 1.2 2008/03/28 15:19:43 eric Exp $
 #
 #  This is the SPEC file for the What Users Module
 #  Anakeen What Application
@@ -64,8 +64,8 @@ URL: http://www.anakeen.com/
 Packager: Yannick Le Briquer <yannick.lebriquer@anakeen.com>
 BuildArchitectures: noarch
 BuildRoot: /tmp/anakeen-root
-Obsoletes:	MAILCONNECTOR
-Provides:	MAILCONNECTOR = @VERSION@
+Obsoletes:	FREEDOM-MAILCONNECTOR
+Provides:	FREEDOM-MAILCONNECTOR = @VERSION@
 Prereq: gettext
 Requires: FREEDOM-LIB >= 2.9.0
 Requires: php-imap
