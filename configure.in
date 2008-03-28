@@ -7,7 +7,7 @@
 #   as published by the Free Software Foundation; either version
 #   2 of the License, or (at your option) any later version.
 #
-AC_REVISION($Id: configure.in,v 1.1 2007/10/12 06:54:19 eric Exp $)
+AC_REVISION($Id: configure.in,v 1.2 2008/03/28 10:35:25 eric Exp $)
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -18,7 +18,9 @@ VERSION=`cat VERSION`
 AC_SUBST(RELEASE)
 RELEASE=`cat RELEASE`
 AC_SUBST(PACKAGE)
-PACKAGE=FREEDOM-MAILCONNECTOR
+PACKAGE=freedom-mailconnector
+AC_SUBST(APPNAME)
+APPNAME=MAILCONNECTOR
 
 ac_default_prefix=/usr/share/what
 
@@ -53,4 +55,4 @@ AC_ARG_WITH(dbport,
 [  --with-dbport=port number  the database port (default 5432)], DBPORT=$withval)
 
 
-AC_OUTPUT(Makefile MAILCONNECTOR_init.php FREEDOM-MAILCONNECTOR.spec)
+AC_OUTPUT(Makefile MAILCONNECTOR_init.php freedom-mailconnector.spec)
