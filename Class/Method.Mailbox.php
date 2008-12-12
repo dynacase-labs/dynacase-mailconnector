@@ -122,12 +122,19 @@ function mb_retrieveSubject(&$count,&$subject,$limit=5) {
     $folders = imap_list($this->mbox, $fdir, "*");
     $count=0;
     $subject=array();
-    foreach ($folders as $k=>$subfld) {
-      $subsubject=array();
-      $this->mb_retrieveFolderSubject($subcount,$subsubject,$limit-$count,$subfld);
-      $count+=$subcount;
-      $subject=array_merge($subject,$subsubject);
-    }    
+    if ($folders!=FALSE) { //if there is an error imap_list returns FALSE not an empty array (as expected by docs)
+                           //or if $folders is an empty array
+      /*print "count de folders: ".count($folders);
+      print "contenu de folders:";
+      print_r2($folders);
+      print "fin de folders";*/
+      foreach ($folders as $k=>$subfld) {
+        $subsubject=array();
+        $this->mb_retrieveFolderSubject($subcount,$subsubject,$limit-$count,$subfld);
+        $count+=$subcount;
+        $subject=array_merge($subject,$subsubject);
+      }
+    }
   } else {
     $this->mb_retrieveFolderSubject($count,$subject,$limit);  
   }
@@ -464,7 +471,9 @@ function mb_recursiveRetrieveMessages(&$count) {
     $filter[]="smb_mailboxid=".$this->initid;
     $subfolders=getChildDoc($this->dbaccess,0,"0","ALL",$filter,1,"TABLE","SUBMAILBOX");
     $subtitle=array();
-    foreach ($subfolders as $ids=>$dsub) $subtitle[$dsub["initid"]]=$dsub["smb_path"];
+    if (count($subfolders)>0) {
+      foreach ($subfolders as $ids=>$dsub) $subtitle[$dsub["initid"]]=$dsub["smb_path"];
+    }
 
     unset($folders[0]);
     foreach ($folders as $k=>$subfld) {      
