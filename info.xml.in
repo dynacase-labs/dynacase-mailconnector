@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module name="freedom-mailconnector" version="@VERSION@" release="@RELEASE@" basecomponent="yes">
+  <description>This package create 2 documents families:mailbox and &quot;electronic messages&quot;. 
+The mailbox folder can transfert messages from IMAP folder messages to freedom folder.</description>
+  <requires>
+    <module name="freedom-core" />
+  </requires>
+</module>
