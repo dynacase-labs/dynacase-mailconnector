@@ -191,13 +191,13 @@ function postModify() {
 /**
  * decode headers text
  * @param string $s encoded text
- * @return string iso8859-1 text
+ * @return string utf-8 text
  */
 static function mb_decode($s) {
  $t=imap_mime_header_decode($s);
  $ot='';
  foreach ($t as $st) {
-   if ($st->charset=="utf-8") $ot.=utf8_decode($st->text);
+   if ($st->charset=="iso8858-1") $ot.=utf8_encode($st->text);
    else $ot.=$st->text;
  }
 
@@ -302,7 +302,7 @@ function mb_bodydecode($part,&$body) {
   }
   if ($part->ifparameters) {
     foreach ($part->parameters as $v) {
-      if (($v->attribute=="charset") && ($v->value=="utf-8")) $body=utf8_decode($body);
+      if (($v->attribute=="charset") && ($v->value=="iso8859-1")) $body=utf8_encode($body);
     }
   }
 
