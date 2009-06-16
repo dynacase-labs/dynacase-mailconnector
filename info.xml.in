@@ -1,8 +1,35 @@
 <?xml version="1.0"?>
 <module name="freedom-mailconnector" version="@VERSION@" release="@RELEASE@">
-  <description>This package create 2 documents families:mailbox and &quot;electronic messages&quot;. 
+
+  <description lang="en">This package create 2 documents families:mailbox and &quot;electronic messages&quot;.
 The mailbox folder can transfert messages from IMAP folder messages to freedom folder.</description>
+
   <requires>
-    <module name="freedom-core" />
+    <module name="freedom" />
   </requires>
+
+  <pre-install>
+    <check type="phpfunction" function="imap_open">
+      <help>You might need to install a php-imap package from your distribution in order to get IMAP support in PHP.</help>
+    </check>
+    <check type="phpfunctino" function="mb_get_info">
+      <help>You might need to install a php-mbstring package from your distribution in order to get Multibyte String support in PHP.</help>
+    </check>
+  </pre-install>
+
+  <post-install>
+    <process command="programs/app_post MAILCONNECTOR I" />
+    <process command="programs/record_application MAILCONNECTOR" />
+    <process command="programs/app_post MAILCONNECTOR U" />
+    <process command="programs/update_catalog" />
+  </post-install>
+ 
+  <post-upgrade>
+    <process command="programs/pre_migration MAILCONNECTOR" />
+    <process command="programs/app_post MAILCONNECTOR U" />
+    <process command="programs/record_application MAILCONNECTOR" />
+    <process command="programs/post_migration MAILCONNECTOR" />
+    <process command="programs/update_catalog" />
+  </post-upgrade>
+
 </module>
