@@ -10,7 +10,7 @@ function getimapfolders($mboxid) {
       //      print_r2($list);
       sort($list);
       foreach ($list as $k=>$fld) {
-	$fld=mb_convert_encoding( $fld, "ISO_8859-1", "UTF7-IMAP" ); 
+	$fld=mb_convert_encoding( $fld, "UTF8", "UTF7-IMAP" ); 
 	//print "|$fld]\n<br>";
 	//	$fld=$mb->imap_utf7_decode_zero($fld);
 	$f=substr($fld,strpos($fld,'}')+1);

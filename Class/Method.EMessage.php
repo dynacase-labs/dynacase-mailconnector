@@ -56,7 +56,7 @@ function viewemessage($target="_self",$ulink=true,$abstract=false) {
  * force no edition
  */
 function control($aclname) {
-  if ($aclname=="edit") return _("electronic messages cannot be modified");
+  if (($this->id > 0) &&($aclname=="edit")&&($this->getParamValue("emsg_editcontrol")!="freeedit")) return _("electronic messages cannot be modified");
   else return parent::control($aclname);
 }
 

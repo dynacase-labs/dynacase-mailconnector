@@ -20,6 +20,15 @@ function specRefresh() {
   
 }
 
+function minDelay($t) {  
+  $sug=array();
+
+  if (($t > 0) && ($t < 5)) $err=sprintf(_("min delay is 5 minutes"));
+  if ($err) $sug=array("0",5,10,15,30,60,120);
+  return array("err"=>$err,
+		"sug"=>$sug);
+}
+
 /**
  * set personnal profil by default
  */
@@ -75,7 +84,7 @@ function mb_retrieveMessages(&$count,$fdir="") {
 function mb_retrieveFolderMessages(&$count,$fdir="") {   
   if ($fdir=="") {
    $folder=$this->getValue("mb_folder","INBOX");
-   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","UTF8");
   }
 
   $err=$this->control("modify");
@@ -118,7 +127,7 @@ function mb_close() {
 function mb_retrieveSubject(&$count,&$subject,$limit=5) {   
   if ($this->getValue("mb_recursive")=="yes") {
     $folder=$this->getValue("mb_folder","INBOX");
-    $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+    $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","UTF8");
     $folders = imap_list($this->mbox, $fdir, "*");
     $count=0;
     $subject=array();
@@ -147,7 +156,7 @@ function mb_retrieveSubject(&$count,&$subject,$limit=5) {
 function mb_retrieveFolderSubject(&$count,&$subject,$limit=5,$fdir="") {  
   if ($fdir=="") {
    $folder=$this->getValue("mb_folder","INBOX");
-   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+   $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","UTF8");
   } 
   
   $subject=array();
@@ -186,8 +195,53 @@ function postModify() {
   else if (($port=="") && ($security=="SSL")) $this->setValue("mb_serverport",993);
   else if (($port=="143") && ($security=="SSL")) $this->setValue("mb_serverport",993);
   else if (($port=="993") && ($security!="SSL")) $this->setValue("mb_serverport",143);
+  if (intval($this->getValue("mb_autoretrieve")) > 0) $err=$this->createMbProcessus();
+  else $err=$this->deleteMbProcessus();
+  return $err;
 }
 
+function postDelete() {
+  $err=$this->deleteMbProcessus();
+  return $err;
+}
+function deleteMbProcessus() {
+  $name="EXECMB_".$this->initid;
+  $doc=new_doc($this->dbaccess,$name);
+  $err="";
+  if ($doc->isAlive()) {
+    $err=$doc->delete(true,false);
+  }
+  return $err;
+}
+
+function createMbProcessus() {
+  $name="EXECMB_".$this->initid;
+  $doc=new_doc($this->dbaccess,$name);
+  $err="";
+  if (! $doc->isAlive()) {
+    $doc=createDoc($this->dbaccess,"EXEC",false);
+    if ($doc) {
+      $doc->disableEditControl();
+      $doc->name=$name;
+      $doc->setValue("exec_application","MAILCONNECTOR");
+      $doc->setValue("exec_action","MB_RETRIEVEMESSAGES");
+
+      $doc->addArrayRow("exec_t_parameters",array("exec_idvar"=>"id",
+						  "exec_valuevar"=>$this->id));
+
+
+      $doc->setValue("exec_periodmin",$this->getValue("mb_autoretrieve"," "));
+      $doc->setValue("exec_handnextdate",$this->getTimeDate());
+      $doc->setValue("exec_title",sprintf(_("Retrieve messages for %s mailbox"),$this->getTitle()));
+      $err=$doc->add();
+      if ($err=="") {
+	$doc->postModify();
+	$doc->refresh();
+      }
+    }
+  }
+  return $err;
+}
 /**
  * decode headers text
  * @param string $s encoded text
@@ -195,9 +249,9 @@ function postModify() {
  */
 static function mb_decode($s) {
  $t=imap_mime_header_decode($s);
- $ot='';
+ $ot=''; 
  foreach ($t as $st) {
-   if ($st->charset=="iso8858-1") $ot.=utf8_encode($st->text);
+   if (strtolower($st->charset)=="iso-8859-1") $ot.=utf8_encode($st->text);
    else $ot.=$st->text;
  }
 
@@ -227,7 +281,6 @@ function mb_parseMessage($msg) {
    $this->msgStruct["from"]=$this->mb_implodemail($h->from);
    $this->msgStruct["cc"]=$this->mb_implodemail($h->cc);
    $this->msgStruct["size"]=$h->Size;
-
 
    //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
     $status = imap_setflag_full($this->mbox, $msg, '\\Flagged');
@@ -302,7 +355,7 @@ function mb_bodydecode($part,&$body) {
   }
   if ($part->ifparameters) {
     foreach ($part->parameters as $v) {
-      if (($v->attribute=="charset") && ($v->value=="iso8859-1")) $body=utf8_encode($body);
+      if (($v->attribute=="charset") && (strtolower($v->value)=="iso-8859-1")) $body=utf8_encode($body);
     }
   }
 
@@ -335,19 +388,18 @@ function mb_getmultipart($o,$msg,$chap="") {
 	 $part->disposition=strtoupper($part->disposition);
 	 if (($part->disposition=="INLINE")||($part->disposition=="ATTACHMENT")) {
 	   $body=imap_fetchbody($this->mbox,$msg,sprintf("$chap%d",$k+1));
-	   
 	   $this->mb_bodydecode($part,$body);
 	   $basename="";
 	   if ($part->ifdparameters) {
 	     foreach ($part->dparameters as $param) {
-	       $param->attribute=strtoupper($param->attribute);
-	       if ($param->attribute=="FILENAME") $basename=basename($param->value);
+	       $param->attribute=strtok(strtoupper($param->attribute),'*');
+	       if ($param->attribute=="FILENAME") $basename=basename($this->mb_decode(urldecode($param->value)));	      
 	     }
 	   }
 	   if ($part->ifparameters) {
 	     foreach ($part->parameters as $param) {
 	       $param->attribute=strtoupper($param->attribute);
-	       if ($param->attribute=="NAME") $name=$param->value;
+	       if ($param->attribute=="NAME") $basename=$this->mb_decode($param->value);
 	     }
 	   }
 	   $filename=uniqid("/var/tmp/_fdl").'.'.strtolower($part->subtype);
@@ -389,14 +441,15 @@ function mb_createMessage() {
 
   $uid=pg_escape_string($this->msgStruct["uid"]);
   $filter[]="emsg_uid='$uid'";
-  $filter[]="emsg_mailboxid=".$this->initid;
-  $tdir=getChildDoc($this->dbaccess,0,"0",1,$filter,1,"LIST","EMESSAGE");
+  $filter[]="emsg_mailboxid='".$this->initid."'";
+  $fammsg=$this->getValue("mb_msg_family","EMESSAGE");
+
+  $tdir=getChildDoc($this->dbaccess,0,"0",1,$filter,1,"LIST",$fammsg);
   if (count($tdir)==0) {
-    $msg=createdoc($this->dbaccess,"EMESSAGE");    
+    $msg=createdoc($this->dbaccess,$fammsg);    
   } else {
     $msg=$tdir[0];
   }
-  //  print_r2($this->msgStruct);
   if ($msg) {
       $msg->setValue("emsg_mailboxid",$this->initid);
       $msg->setValue("emsg_uid",$this->msgStruct["uid"]);
@@ -461,25 +514,24 @@ function mb_createMessage() {
 function mb_recursiveRetrieveMessages(&$count) {
   include_once("FDL/Lib.Dir.php");
   $folder=$this->getValue("mb_folder","INBOX");
-  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","ISO-8859-15");
+  $fdir=$this->fimap.mb_convert_encoding($folder, "UTF7-IMAP","UTF8");
   $folders = imap_list($this->mbox, $fdir, "*");
 
   $this->mb_retrieveFolderMessages($count); // main folder
   if (count($folders)>0) {
   
     $filter=array();
-    $filter[]="smb_mailboxid=".$this->initid;
+    $filter[]="smb_mailboxid='".$this->initid."'";
     $subfolders=getChildDoc($this->dbaccess,0,"0","ALL",$filter,1,"TABLE","SUBMAILBOX");
     $subtitle=array();
     if (count($subfolders)>0) {
       foreach ($subfolders as $ids=>$dsub) $subtitle[$dsub["initid"]]=$dsub["smb_path"];
     }
-
-    unset($folders[0]);
+    // unset($folders[0]);
     foreach ($folders as $k=>$subfld) {      
-      $isofld=mb_convert_encoding( $subfld, "ISO_8859-1", "UTF7-IMAP" ); 
-      $f=substr($isofld,strpos($isofld,'}')+1);
-      
+      $isofld=mb_convert_encoding( $subfld, "UTF8", "UTF7-IMAP" ); 
+      $f=substr($isofld,mb_strpos($isofld,'}')+1);
+
       $keysubfolder=array_search($f,$subtitle);
       if (! $keysubfolder) {
 	// new sub folder : create it
@@ -506,7 +558,7 @@ function mb_recursiveRetrieveMessages(&$count) {
       }
       
       $err=$this->mb_retrieveFolderMessages($subcount,$subfld);
-      //print "count:$count for $subfld <b>$err</b><br>";	
+     // print "count:$count for $subfld <b>$err</b><br>";	
       $count+=$subcount;
     }
   }
