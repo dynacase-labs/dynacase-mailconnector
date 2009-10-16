@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WORKSPACE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-17 17:38+0200\n"
+"POT-Creation-Date: 2009-10-16 18:03+0200\n"
 "PO-Revision-Date: 2001-03-14 00:54-0500\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: english-anakeen <distrib@anakeen.com>\n"
@@ -14,6 +14,28 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "\n"
+
+msgid "min delay is 5 minutes"
+msgstr ""
+
+#, c-format
+msgid "imap folder %s not found : %s"
+msgstr ""
+
+#, c-format
+msgid "%d messages transfered"
+msgstr ""
+
+#, c-format
+msgid "imap folder %s not found"
+msgstr ""
+
+#, c-format
+msgid "Retrieve messages for %s mailbox"
+msgstr ""
+
+msgid "electronic messages cannot be modified"
+msgstr ""
 
 msgid "Mail connector"
 msgstr ""
@@ -30,63 +52,34 @@ msgstr ""
 msgid "View and create new mailboxes"
 msgstr ""
 
-msgid "View my mailboxes"
-msgstr ""
-
-#, c-format
-msgid "imap folder %s not found"
-msgstr ""
-
-#, c-format
-msgid "%d messages transfered"
-msgstr ""
-
-#, c-format
-msgid "no new messages in imap %s folder"
-msgstr ""
-
-msgid "electronic messages cannot be modified"
-msgstr ""
-
 msgid "Service for verify new mail"
 msgstr ""
 
-#, c-format
-msgid "cannot see unknow reference %s"
-msgstr ""
-
-msgid "connection OK"
-msgstr ""
-
-#, c-format
-msgid "%d messages transferred"
-msgstr ""
-
-#, c-format
-msgid "%d messages to transferts"
-msgstr ""
-
-msgid "no new messages"
-msgstr ""
-
-msgid "one new message"
-msgstr ""
-
-#, c-format
-msgid "%s new messages"
-msgstr ""
-
-#, c-format
-msgid "exchange mailboxes  -%d-"
-msgstr ""
-
-msgid "timeout in second for waiting connection"
+msgid "View my mailboxes"
 msgstr ""
 
 msgid "MB_To"
 msgstr ""
 
 msgid "MB_Cc"
+msgstr ""
+
+msgid "Messages log"
+msgstr ""
+
+msgid "Retrieve date"
+msgstr ""
+
+msgid "Message Date"
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
+msgid "mbfrom"
+msgstr ""
+
+msgid "mbto"
 msgstr ""
 
 msgid "Create new mailbox"
@@ -114,4 +107,36 @@ msgid "Transfert"
 msgstr ""
 
 msgid "View only first five"
+msgstr ""
+
+#, c-format
+msgid "cannot see unknow reference %s"
+msgstr ""
+
+msgid "connection OK"
+msgstr ""
+
+#, c-format
+msgid "%d messages transferred"
+msgstr ""
+
+msgid "no new messages"
+msgstr ""
+
+msgid "one new message"
+msgstr ""
+
+#, c-format
+msgid "%s new messages"
+msgstr ""
+
+#, c-format
+msgid "exchange mailboxes  -%d-"
+msgstr ""
+
+#, c-format
+msgid "%d messages to transferts"
+msgstr ""
+
+msgid "timeout in second for waiting connection"
 msgstr ""

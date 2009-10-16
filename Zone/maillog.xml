@@ -1,0 +1,22 @@
+<style>
+table.tableborder tbody tr:hover { 
+  background-color:[COLOR_C5];
+                                    }
+table.tableborder tbody td { 
+  border-style: none solid none none;               
+  border-width:1px;
+  white-space:nowrap;
+                                    }
+</style>
+
+<h1>[TEXT:Messages log]</h1>
+
+<table width="100%" class="tableborder">
+<thead>
+<tr><th>[TEXT:Retrieve date]</th><th>[TEXT:Message Date]</th><th>[TEXT:Subject]</th><th>[TEXT:mbfrom]</th><th>[TEXT:mbto]</th></tr>
+</thead><tbody>
+[BLOCK log]
+<tr><td>[rdate]</td><td>[msgdate]</td><td><a target="msg[msgid]" href="[CORE_STANDURL]app=FDL&action=FDL_CARD&id=[msgid]">[subject]</a></td><td>[from]</td><td>[to]</td></tr>
+[ENDBLOCK log]
+</tbody>
+</table>

@@ -342,6 +342,8 @@ function mb_parseMessage($msg) {
 
    $this->mb_getcid($msg);
    $err=$this->mb_createMessage();
+   
+
    return $err;
 
 }
@@ -523,6 +525,15 @@ function mb_createMessage() {
 	  $destFolder->addFile($msg->id);	  
 	}
       }
+      if ($err=="") {
+	$headmsg=array("subject"=>$this->msgStruct["subject"],
+		       "date"=>$this->msgStruct["date"],
+		       "from"=>$this->msgStruct["from"],
+		       "msgid"=>$msg->id,
+		       "to"=>$this->msgStruct["to"]);
+	$headmsg=serialize($headmsg);
+	$this->addComment($headmsg,HISTO_NOTICE,"MB_RETREIVE");
+      }
   } 
   return $err;
 }
@@ -647,5 +658,21 @@ private function getDestFolder() {
 
 function mb_isRecursive() {  
   return ($this->getValue("mb_recursive")=="yes")?MENU_ACTIVE:MENU_INVISIBLE;
+}
+
+function maillog($target="_self",$ulink=true,$abstract=false) {
+  $tlog=$this->getHisto(true,"MB_RETREIVE",300);
+  $tout=array();
+  foreach ($tlog as $klog=>$log) {
+    $msghead=unserialize($log["comment"]);
+    if (is_array($msghead)) {
+      $tout[$klog]["rdate"]=strftime("%d/%m/%Y %H:%M",frenchdatetounixts($log["date"]));
+      foreach ($msghead as $k=>$v) {
+	$tout[$klog][$k]=$v;
+      }
+      $tout[$klog]["msgdate"]=strftime("%d/%m/%Y %H:%M",strtotime($tout[$klog]["date"]));
+    }
+  }
+  $this->lay->setBlockData("log",$tout);
 }
 ?>
