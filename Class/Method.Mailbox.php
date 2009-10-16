@@ -95,12 +95,34 @@ function mb_retrieveFolderMessages(&$count,$fdir="") {
   }
 
   if ($err=="") {     
-    $msgs = imap_search($this->mbox,'UNFLAGGED' );
+    $pa=$this->getValue("mb_postaction","tag");
+    $movetofolder=$this->getValue("mb_movetofolder");
+    $msgs = imap_search($this->mbox,'UNFLAGGED UNDELETED' );
+
     if (is_array($msgs)) {              
 	$count=0;
 	foreach ($msgs as $k=>$val) {
 	  $err=$this->mb_parseMessage($val);	
-	  if ($err=="") $count++;
+	  if ($err=="") {
+	    switch ($pa) {
+	    case "tag":
+	      //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
+	      $status = imap_setflag_full($this->mbox, $val, '\\Flagged');
+	      //$status = imap_setflag_full($this->mbox, $msg, '$label3');
+	      break;
+	    case "delete":
+	      $status = imap_delete($this->mbox, $val);
+	      break;
+	    case "destroy":
+	      $status = imap_delete($this->mbox, $val);
+	      imap_expunge($this->mbox);
+	      break;
+	    }
+	    if (($pa!="destroy") && $movetofolder) {
+	      imap_mail_move($this->mbox, "$val:$val",$movetofolder);	      
+	    }
+	    $count++;
+	  }
 	  else addWarningMsg($err);
 	}
 	$this->AddComment(sprintf(_("%d messages transfered"),$count));
@@ -165,7 +187,7 @@ function mb_retrieveFolderSubject(&$count,&$subject,$limit=5,$fdir="") {
   }
 
   if ($err=="") {     
-    $msgs = imap_search($this->mbox,'UNFLAGGED' );
+    $msgs = imap_search($this->mbox,'UNFLAGGED UNDELETED' );
     if (is_array($msgs)) {
       $count=count($msgs);       
       $c=0;
@@ -251,7 +273,7 @@ static function mb_decode($s) {
  $t=imap_mime_header_decode($s);
  $ot=''; 
  foreach ($t as $st) {
-   if (strtolower($st->charset)=="iso-8859-1") $ot.=utf8_encode($st->text);
+   if ($st->charset && $st->charset!="default")  $ot.=@mb_convert_encoding($st->text, "UTF-8",$st->charset );
    else $ot.=$st->text;
  }
 
@@ -264,12 +286,9 @@ function mb_parseMessage($msg) {
   
   $h= imap_header($this->mbox,$msg);
   $uid=$h->message_id;
-  //  print "<b>".$this->mb_decode($h->subject)."</b> [$uid]";
+  //    print "<b>".$this->mb_decode($h->subject)."</b> [$uid]";
   
-  if ($uid=="") $uid=$h->date.'-'.$h->Size;
-  // print_r2($h);
-
-  
+  if ($uid=="") $uid=$h->date.'-'.$h->Size;  
   //	print("<b>$body</b>");
   $this->msgStruct=array();
    $this->msgStruct["subject"]=$this->mb_decode($h->subject);
@@ -282,9 +301,6 @@ function mb_parseMessage($msg) {
    $this->msgStruct["cc"]=$this->mb_implodemail($h->cc);
    $this->msgStruct["size"]=$h->Size;
 
-   //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
-    $status = imap_setflag_full($this->mbox, $msg, '\\Flagged');
-    //$status = imap_setflag_full($this->mbox, $msg, '$label3');
 
 
    $o=imap_fetchstructure($this->mbox,$msg);
@@ -353,9 +369,12 @@ function mb_bodydecode($part,&$body) {
   case 5: // Others
     break;
   }
+
   if ($part->ifparameters) {
     foreach ($part->parameters as $v) {
-      if (($v->attribute=="charset") && (strtolower($v->value)=="iso-8859-1")) $body=utf8_encode($body);
+      if ($v->attribute=="charset") {
+	if ($v->value && $v->value!="default")  $body=@mb_convert_encoding($body,"UTF-8",$v->value);
+      }
     }
   }
 

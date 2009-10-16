@@ -42,6 +42,7 @@ function mb_retrievemessages(&$action) {
     else $action->AddWarningMsg(sprintf(_("%d messages transferred"),$count));
   }
   $doc->modify(); 
+
   redirect($action,GetHttpVars("redirect_app","FDL"),
 	   GetHttpVars("redirect_act","FDL_CARD&id=$docid"),
 	   $action->GetParam("CORE_STANDURL"));
