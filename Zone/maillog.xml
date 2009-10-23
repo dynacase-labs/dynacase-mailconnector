@@ -9,8 +9,9 @@ table.tableborder tbody td {
                                     }
 </style>
 
-<h1>[TEXT:Messages log]</h1>
-
+<h1 style="float:left">[TEXT:Messages log]</h1>
+<h3 style="float:right">[title] [today]</h3>
+<br style="clear:both"/>
 <table width="100%" class="tableborder">
 <thead>
 <tr><th>[TEXT:Retrieve date]</th><th>[TEXT:Message Date]</th><th>[TEXT:Subject]</th><th>[TEXT:mbfrom]</th><th>[TEXT:mbto]</th></tr>

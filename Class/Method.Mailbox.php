@@ -33,15 +33,23 @@ function minDelay($t) {
  * set personnal profil by default
  */
 function mb_setProfil() {
-  $pp=getMyProfil($this->dbaccess);
+  if ($this->getValue("fld_pdocid")=="") {
 
-  if ($pp->isAlive()) {
-    $this->setValue("fld_pdocid",$pp->id);
-    $this->setValue("fld_pdirid",$pp->id);
-    $this->setProfil($pp->id);
-    $err=$this->modify();
+    $pp=createDoc($this->dbaccess,"PDIR",false);
+    $pp->setValue("ba_title",sprintf(_("profil for %s mailbox"),$this->title));
+    $pp->setValue("prf_desc",sprintf(_("associated default profil for [ADOC %s] mailbox"),$this->id));
+    $err=$pp->add();
+    if ($err=="") {
+      $this->setValue("fld_pdocid",$pp->id);
+      $this->setValue("fld_pdirid",$pp->id);
+
+      $mpp=getMyProfil($this->dbaccess);
+      if ($mpp->isAlive()) {
+	$this->setProfil($mpp->id);
+      }
+      $err=$this->modify();
+    }
   }
-
   return $err;
   
 }
@@ -104,27 +112,29 @@ function mb_retrieveFolderMessages(&$count,$fdir="") {
 	foreach ($msgs as $k=>$val) {
 	  $err=$this->mb_parseMessage($val);	
 	  if ($err=="") {
+	    $status = imap_setflag_full($this->mbox, $val, '\\Flagged');
 	    switch ($pa) {
 	    case "tag":
 	      //$status = imap_clearflag_full($this->mbox, $msg, "\\Seen");
-	      $status = imap_setflag_full($this->mbox, $val, '\\Flagged');
 	      //$status = imap_setflag_full($this->mbox, $msg, '$label3');
 	      break;
 	    case "delete":
 	      $status = imap_delete($this->mbox, $val);
 	      break;
-	    case "destroy":
-	      $status = imap_delete($this->mbox, $val);
-	      imap_expunge($this->mbox);
+	    case "move":
+	      if ($movetofolder) {
+		imap_mail_move($this->mbox, "$val:$val",$movetofolder);	      
+	      }
 	      break;
-	    }
-	    if (($pa!="destroy") && $movetofolder) {
-	      imap_mail_move($this->mbox, "$val:$val",$movetofolder);	      
 	    }
 	    $count++;
 	  }
 	  else addWarningMsg($err);
 	}
+	if ($this->getValue("mb_purge")=="yes") {	  
+	      imap_expunge($this->mbox);
+	}
+
 	$this->AddComment(sprintf(_("%d messages transfered"),$count));
           
     } else {
@@ -673,6 +683,8 @@ function maillog($target="_self",$ulink=true,$abstract=false) {
       $tout[$klog]["msgdate"]=strftime("%d/%m/%Y %H:%M",strtotime($tout[$klog]["date"]));
     }
   }
+  $this->lay->set("title",$this->getDocAnchor($this->id));
+  $this->lay->set("today",strftime("%a %d/%m/%Y %H:%M",time()));
   $this->lay->setBlockData("log",$tout);
 }
 ?>

@@ -2,7 +2,7 @@
 
 include_once("FDL/Lib.Dir.php");
 include_once("FDL/Class.Doc.php");
-// include_once("FDL/Class.WDocPropo.php");
+
 function verifymail(&$action) {
 
   header('Content-type: text/xml; charset=utf-8');

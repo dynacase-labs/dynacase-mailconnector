@@ -46,7 +46,10 @@ $action_desc = array (
 			    "short_name" =>N_("View and create new mailboxes")),
 		      array( 
 			    "name" => "VERIFYMAIL", 
-			    "short_name" =>N_("Service for verify new mail")),		      
+			    "short_name" =>N_("Service for verify new mail")),	
+		      array( 
+			    "name" => "MB_PROFILACTIVATE", 
+			    "short_name" =>N_("Modify messages profils")),		      
 		      array( 
 			    "name" => "APPPREFS",			    
 			    "script"             =>"admin.php",

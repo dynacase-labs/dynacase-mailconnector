@@ -1,11 +1,11 @@
 <?php
 /**
- *Retrieve messages from IMAP folder
+ * Retrieve messages from IMAP folder
  *
  * @author Anakeen 2007
  * @version $Id: mb_retrievemessages.php,v 1.3 2007/10/23 15:30:39 eric Exp $
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @package FREEDOM
+ * @package MAILCONNECTOR
  * @subpackage 
  */
  /**
