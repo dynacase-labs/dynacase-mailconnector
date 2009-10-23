@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MailConnector\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-16 18:03+0200\n"
-"PO-Revision-Date: 2009-10-16 18:06+0200\n"
+"POT-Creation-Date: 2009-10-23 12:26+0200\n"
+"PO-Revision-Date: 2009-10-23 12:41+0200\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: French <distrib@anakeen.com>\n"
 "MIME-Version: 1.0\n"
@@ -16,6 +16,14 @@ msgstr ""
 
 msgid "min delay is 5 minutes"
 msgstr "Le délai minimum est de 5 minutes"
+
+#, c-format
+msgid "profil for %s mailbox"
+msgstr "Profil pour la boîte aux lettres %s"
+
+#, c-format
+msgid "associated default profil for [ADOC %s] mailbox"
+msgstr "Profil associé par défaut pour la boîte aux lettres [ADOC %s]"
 
 #, c-format
 msgid "imap folder %s not found : %s"
@@ -53,6 +61,9 @@ msgstr "Voir et créer des boites d'échange pour le couriel"
 
 msgid "Service for verify new mail"
 msgstr "Service pour la vérifications des boites d'échange de couriel"
+
+msgid "Modify messages profils"
+msgstr "Modification du profil des messages"
 
 msgid "View my mailboxes"
 msgstr "Voir mes boîtes d'échange"
@@ -111,6 +122,9 @@ msgstr "connexion OK"
 #, c-format
 msgid "%d messages transferred"
 msgstr "%d messages transférés"
+
+msgid "no message profil document has been defined"
+msgstr "aucun document profil pour les messages a été défini"
 
 msgid "no new messages"
 msgstr "pas de nouveau message"

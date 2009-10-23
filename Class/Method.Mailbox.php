@@ -384,12 +384,11 @@ function mb_bodydecode($part,&$body) {
 
   if ($part->ifparameters) {
     foreach ($part->parameters as $v) {
-      if ($v->attribute=="charset") {
+      if (strtolower($v->attribute)=="charset") {
 	if ($v->value && $v->value!="default")  $body=@mb_convert_encoding($body,"UTF-8",$v->value);
       }
     }
   }
-
 }
 
 /**
