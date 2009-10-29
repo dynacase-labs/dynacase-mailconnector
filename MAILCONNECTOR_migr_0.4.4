@@ -14,7 +14,7 @@ famsmsg=doc${famsmsg/ /}
 if [ '$famemsg' != 'doc' ]; then
    echo "change inherit $famemsg to $famsmsg"
 
-   PGSERVICE="$pgservice_freedom" \psql -c "ALTER TABLE $famemsg INHERIT $famsmsg;ALTER TABLE $famemsg ADD column emsg_refid text;ALTER TABLE $famemsg  INHERIT $famsmsg;ALTER TABLE $famemsg no INHERIT doc;" 
+   PGSERVICE="$pgservice_freedom" \psql -c "ALTER TABLE $famemsg ADD column emsg_refid text;ALTER TABLE $famemsg  INHERIT $famsmsg;ALTER TABLE $famemsg no INHERIT doc;" 
 
 fi
 
