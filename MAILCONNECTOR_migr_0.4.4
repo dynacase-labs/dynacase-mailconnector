@@ -14,6 +14,8 @@ famsmsg=doc${famsmsg/ /}
 if [ '$famemsg' != 'doc' ]; then
    echo "change inherit $famemsg to $famsmsg"
 
+   PGSERVICE="$pgservice_freedom" \psql -c "ALTER TABLE $famemsg ALTER COLUMN emsg_date TYPE timestamp without time zone;"
+
    PGSERVICE="$pgservice_freedom" \psql -c "ALTER TABLE $famemsg ADD column emsg_refid text;ALTER TABLE $famemsg  INHERIT $famsmsg;ALTER TABLE $famemsg no INHERIT doc;" 
 
 fi
