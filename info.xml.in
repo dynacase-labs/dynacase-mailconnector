@@ -5,7 +5,7 @@
 The mailbox folder can transfert messages from IMAP folder messages to dynacase folder.</description>
 
   <replaces>
-        <module name="dynacase-mailconnector" />
+        <module name="freedom-mailconnector" />
   </replaces>
 
   <requires>
