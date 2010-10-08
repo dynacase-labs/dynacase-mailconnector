@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
-<module name="freedom-mailconnector" version="@VERSION@" release="@RELEASE@" infopath="http://www.freedom-ecm.org/modules/freedom-mailconnector/freedom-mailconnector">
+<module name="dynacase-mailconnector" version="@VERSION@" release="@RELEASE@" license="@LICENSE@" infopath="http://www.dynacase.org/modules/dynacase-mailconnector/dynacase-mailconnector">
 
   <description lang="en">This package create 2 documents families:mailbox and &quot;electronic messages&quot;.
-The mailbox folder can transfert messages from IMAP folder messages to freedom folder.</description>
+The mailbox folder can transfert messages from IMAP folder messages to dynacase folder.</description>
+
+  <replaces>
+        <module name="freedom-mailconnector" />
+  </replaces>
 
   <requires>
+    <module name="dynacase-platform" />
   </requires>
 
   <pre-install>

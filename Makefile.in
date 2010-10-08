@@ -15,7 +15,7 @@ TAR = gtar
 GZIP_ENV = --best
 export targetdir PACKAGE
 
-SUBDIR= Class Actions Zone Images debian
+SUBDIR= Class Actions Zone Images
 
 pages_not_xml = info.xml
 pages_not_php=fam2po.php po2js.php
