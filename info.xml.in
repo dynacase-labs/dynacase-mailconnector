@@ -9,7 +9,7 @@ The mailbox folder can transfert messages from IMAP folder messages to dynacase 
   </replaces>
 
   <requires>
-    <module name="dynacase-platform" />
+    <module name="dynacase-platform" comp="lt" version="3.2.0" />
   </requires>
 
   <pre-install>
