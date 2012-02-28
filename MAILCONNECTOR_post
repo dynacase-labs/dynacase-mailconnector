@@ -15,11 +15,7 @@ fi
 #post update
 #------------------------------
 if [ "$1" = "U" ] ; then
-
-  $wpub/wsh.php --api=freedom_import --file=$wpub/MAILCONNECTOR/mailconnector.ods
-  $wpub/wsh.php --api=freedom_import --file=$wpub/MAILCONNECTOR/mc_services.ods
-  
-
+  echo
 fi
 
 #------------------------------
