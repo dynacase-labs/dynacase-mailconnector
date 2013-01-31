@@ -23,7 +23,7 @@ function mb_retrievemessages(Action & $action)
      * @var _MAILBOX $doc
      */
     $doc = new_Doc($dbaccess, $docid);
-    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see unknow reference %s") , $docid));
+    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see mb unknow reference %s") , $docid));
     
     $err = $doc->mb_connection();
     if ($err != "") {

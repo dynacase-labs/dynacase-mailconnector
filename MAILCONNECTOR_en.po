@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WORKSPACE\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-31 13:31+0100\n"
+"POT-Creation-Date: 2013-01-31 17:01+0100\n"
 "PO-Revision-Date: 2001-03-14 00:54-0500\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: english-anakeen <distrib@anakeen.com>\n"
@@ -35,13 +35,10 @@ msgstr ""
 msgid "Access admin mailboxes"
 msgstr ""
 
-msgid "Copy messages from IMAP to freedom"
+msgid "Copy messages from IMAP to dynacase"
 msgstr ""
 
 msgid "Create new mailbox"
-msgstr ""
-
-msgid "Folder"
 msgstr ""
 
 msgid "IMAP Server"
@@ -57,6 +54,9 @@ msgid "Mailbox Name"
 msgstr ""
 
 msgid "Manage linked mailboxes"
+msgstr ""
+
+msgid "MbFolder"
 msgstr ""
 
 msgid "Message Date"
@@ -93,9 +93,6 @@ msgstr ""
 msgid "View and create new mailboxes"
 msgstr ""
 
-msgid "View my mailboxes"
-msgstr ""
-
 msgid "View only first five"
 msgstr ""
 
@@ -104,7 +101,7 @@ msgid "associated default profil for [ADOC %s] mailbox"
 msgstr ""
 
 #, c-format
-msgid "cannot see unknow reference %s"
+msgid "cannot see mb unknow reference %s"
 msgstr ""
 
 msgid "connection OK"
@@ -140,7 +137,7 @@ msgstr ""
 msgid "one new message"
 msgstr ""
 
-msgid "open it in a new window"
+msgid "open mb in a new window"
 msgstr ""
 
 #, c-format

@@ -21,7 +21,7 @@ function mb_profilactivate(Action & $action)
     $dbaccess = $action->GetParam("FREEDOM_DB");
     
     $doc = new_Doc($dbaccess, $docid);
-    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see unknow reference %s") , $docid));
+    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see mb unknow reference %s") , $docid));
     
     $pdocid = $doc->getRawValue("fld_pdocid");
     if ($pdocid) {

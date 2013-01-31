@@ -60,7 +60,7 @@ function createspace(event,o) {
 </script>
 [IF create]<a onclick="createspace(event,this)"><img needresize="1" width="[SIZE_IMG-X-SMALL]" src="[ficon]">[TEXT:Create new mailbox]</a>[ENDIF create]
 <table>
-<tr onclick="selectspace(event,this,'[id]')"><th>[TEXT:Mailbox Name]</th><th>[TEXT:IMAP Server]</th><th>[TEXT:Folder]</th></tr>
+<tr onclick="selectspace(event,this,'[id]')"><th>[TEXT:Mailbox Name]</th><th>[TEXT:IMAP Server]</th><th>[TEXT:MbFolder]</th></tr>
 [BLOCK SPACES]
 <tr class="mailbox" onclick="selectspace(event,this,'[id]')"><td>[ba_title]</td><td>[mb_login]@[mb_servername]</td><td><img width="20px" needresize="1" src="[IMG:folder.png]">[mb_folder]</td></tr>
 [ENDBLOCK SPACES]

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MailConnector\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-31 13:31+0100\n"
-"PO-Revision-Date: 2013-01-31 13:37+0100\n"
+"POT-Creation-Date: 2013-01-31 17:01+0100\n"
+"PO-Revision-Date: 2013-01-31 17:02+0100\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: French <distrib@anakeen.com>\n"
 "Language: fr\n"
@@ -34,14 +34,11 @@ msgstr "%s nouveaux messages"
 msgid "Access admin mailboxes"
 msgstr "Accès à l'administration des boîtes aux lettres"
 
-msgid "Copy messages from IMAP to freedom"
-msgstr "Copie de messages depuis IMAP vers freedom"
+msgid "Copy messages from IMAP to dynacase"
+msgstr "Copie des messages depuis IMAP"
 
 msgid "Create new mailbox"
 msgstr "Créer une nouvelle boîte à lettres"
-
-msgid "Folder"
-msgstr "Dossier"
 
 msgid "IMAP Server"
 msgstr "Serveur IMAP"
@@ -57,6 +54,9 @@ msgstr "Nom de la boîte à lettre"
 
 msgid "Manage linked mailboxes"
 msgstr "Gestion des boîtes aux lettres connectées"
+
+msgid "MbFolder"
+msgstr "Dossier"
 
 msgid "Message Date"
 msgstr "Date du message"
@@ -92,9 +92,6 @@ msgstr "Transférer"
 msgid "View and create new mailboxes"
 msgstr "Voir et créer des boites d'échange pour le couriel"
 
-msgid "View my mailboxes"
-msgstr "Voir mes boîtes d'échange"
-
 msgid "View only first five"
 msgstr "Seul les 5 premiers sont affichés"
 
@@ -103,8 +100,8 @@ msgid "associated default profil for [ADOC %s] mailbox"
 msgstr "Profil associé par défaut pour la boîte aux lettres [ADOC %s]"
 
 #, c-format
-msgid "cannot see unknow reference %s"
-msgstr "Ne peut voir la référence inconnue \"%s\""
+msgid "cannot see mb unknow reference %s"
+msgstr "Référence de boîte à lettre inconnue %s"
 
 msgid "connection OK"
 msgstr "connexion OK"
@@ -139,8 +136,8 @@ msgstr "pas de nouveau message"
 msgid "one new message"
 msgstr "un nouveau message"
 
-msgid "open it in a new window"
-msgstr "ouvrir dans une nouvelle fenêtre"
+msgid "open mb in a new window"
+msgstr "ouvrir le message dans une autre fenêtre"
 
 #, c-format
 msgid "profil for %s mailbox"
@@ -155,14 +152,29 @@ msgstr "test de connexion vers le serveur IMAP"
 msgid "timeout in second for waiting connection"
 msgstr "timeout en secondes pour les temps de connection"
 
+#~ msgid "Copy messages from IMAP to freedom"
+#~ msgstr "Copie de messages depuis IMAP vers freedom"
+
+#~ msgid "Folder"
+#~ msgstr "Dossier"
+
 #~ msgid "MB_Cc"
 #~ msgstr "Copie à"
 
 #~ msgid "MB_To"
 #~ msgstr "Pour"
 
+#~ msgid "View my mailboxes"
+#~ msgstr "Voir mes boîtes d'échange"
+
+#~ msgid "cannot see unknow reference %s"
+#~ msgstr "Ne peut voir la référence inconnue \"%s\""
+
 #~ msgid "electronic messages cannot be modified"
 #~ msgstr "les messages électroniques ne peuvent être modifiés"
 
 #~ msgid "no new messages in imap %s folder"
 #~ msgstr "pas de nouveau message pour le dossier %s"
+
+#~ msgid "open it in a new window"
+#~ msgstr "ouvrir dans une nouvelle fenêtre"
