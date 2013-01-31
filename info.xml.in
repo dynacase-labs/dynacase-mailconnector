@@ -9,7 +9,7 @@ The mailbox folder can transfert messages from IMAP folder messages to dynacase 
   </replaces>
 
   <requires>
-    <module name="dynacase-core" comp="ge" version="3.2.0" />
+    <module name="dynacase-core" comp="ge" version="3.2.5" />
     <module name="dynacase-webdesk-services" />
   </requires>
 
@@ -33,6 +33,7 @@ The mailbox folder can transfert messages from IMAP folder messages to dynacase 
 
   <post-install>
     <process command="programs/record_application MAILCONNECTOR" />
+    <process command="programs/record_application MAILCONNECTORADMIN" />
     <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mailconnector.ods" />
     <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mc_services.ods" />
     <process command="programs/update_catalog" />
@@ -41,6 +42,7 @@ The mailbox folder can transfert messages from IMAP folder messages to dynacase 
   <post-upgrade>
     <process command="programs/pre_migration MAILCONNECTOR" />
     <process command="programs/record_application MAILCONNECTOR" />
+    <process command="programs/record_application MAILCONNECTORADMIN" />
     <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mailconnector.ods" />
     <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mc_services.ods" />
     <process command="programs/post_migration MAILCONNECTOR" />

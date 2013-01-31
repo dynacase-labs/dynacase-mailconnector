@@ -8,33 +8,37 @@
 include_once ("FDL/Lib.Dir.php");
 include_once ("FDL/Class.Doc.php");
 
-function verifymail(&$action)
+function verifymail(Action & $action)
 {
     
     header('Content-type: text/xml; charset=utf-8');
-    $action->lay->setEncoding("utf-8");
     $dbaccess = $action->GetParam("FREEDOM_DB");
     
-    $myid = $action->user->fid;
-    
-    $filters = array();
-    $filters[] = "owner=" . intval($action->user->id);
-    
-    $ldoc = getChildDoc($dbaccess, 0, "0", "ALL", $filters, $action->user->id, "LIST", "MAILBOX");
+    $s = new SearchDoc($action->dbaccess, "MAILBOX");
+    $s->addFilter("owner=%d", $action->user->id);
+    $s->setObjectReturn(true);
+    $s->search();
+    $ldoc = $s->getDocumentList();
     $action->lay->set("none", count($ldoc) == 0);
+    $tdoc = array();
     foreach ($ldoc as $k => $v) {
+        /**
+         * @var _MAILBOX $v
+         */
         $tdoc[$k] = $v->getValues();
         $tdoc[$k]["id"] = $v->id;
         $tdoc[$k]["title"] = $v->getTitle();
         $count = - 1;
         $err = $v->mb_connection();
+        
+        $subjects = array();
         if ($err == "") {
-            $err = $v->mb_retrieveSubject($count, $subjects);
+            $v->mb_retrieveSubject($count, $subjects);
             $v->mb_close();
         }
         $tsubj = array();
-        if ($count > 0) foreach ($subjects as $v) $tsubj[] = array(
-            "subject" => $v
+        if ($count > 0) foreach ($subjects as $vs) $tsubj[] = array(
+            "subject" => $vs
         );
         $tdoc[$k]["subjects"] = "SUBJECT$k";
         $action->lay->setBlockData("SUBJECT$k", $tsubj);

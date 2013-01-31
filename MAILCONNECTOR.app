@@ -25,7 +25,7 @@
 $app_desc = array (
 		   "name"	 =>"MAILCONNECTOR",		//Name
 		   "short_name"	=>N_("Mail connector"),    	//Short name
-		   "description"=>N_("Copy messages from IMAP to freedom"),  //long description
+		   "description"=>N_("Copy messages from IMAP to dynacase"),  //long description
 		   "access_free"=>"Y",			//Access free ? (Y,N)
 		   "icon"	=>"mailbox.png",	//Icon
 		   "displayable"=>"N",			//Should be displayed on an app list (Y,N)
@@ -40,22 +40,19 @@ $action_desc = array (
 			    "short_name" =>N_("test connection with IMAP server")),
 		      array( 
 			    "name" => "MB_RETRIEVEMESSAGES", 
-			    "short_name" =>N_("retrieves messages from IMAP server")),		      
-		      array( 
-			    "name" => "ADMIN", 
-			    "short_name" =>N_("View and create new mailboxes")),
+			    "short_name" =>N_("retrieves messages from IMAP server")),
 		      array( 
 			    "name" => "VERIFYMAIL", 
 			    "short_name" =>N_("Service for verify new mail")),	
 		      array( 
 			    "name" => "MB_PROFILACTIVATE", 
-			    "short_name" =>N_("Modify messages profils")),		      
-		      array( 
+			    "short_name" =>N_("Modify messages profils"))
+           /*, array(
 			    "name" => "APPPREFS",			    
 			    "script"             =>"admin.php",
 			    "function"           =>"mymailbox",
 			    "layout"           =>"admin.xml",
-			    "short_name" =>N_("View my mailboxes"))
+			    "short_name" =>N_("View my mailboxes"))*/
 		      );
 
 

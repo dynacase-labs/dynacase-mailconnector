@@ -12,20 +12,22 @@ include_once ("FDL/Class.Doc.php");
 /**
  * Retrieve messages from IMAP folder
  * @param Action &$action current action
- * @global id Http var : folder mailbox identificator
+ * @global int $id Http var : folder mailbox identificator
  */
-function mb_retrievemessages(&$action)
+function mb_retrievemessages(Action & $action)
 {
     // Get all the params
     $docid = GetHttpVars("id");
     $dbaccess = $action->GetParam("FREEDOM_DB");
-    
+    /**
+     * @var _MAILBOX $doc
+     */
     $doc = new_Doc($dbaccess, $docid);
     if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see unknow reference %s") , $docid));
     
     $err = $doc->mb_connection();
     if ($err != "") {
-        $this->setValue("mb_connectedimage", "mailbox_red.png");
+        $doc->setValue("mb_connectedimage", "mailbox_red.png");
         $action->AddWarningMsg($err);
     } else {
         $doc->setValue("mb_connectedimage", "mailbox_green.png");

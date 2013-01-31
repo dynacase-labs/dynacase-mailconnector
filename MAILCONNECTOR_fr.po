@@ -6,85 +6,120 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MailConnector\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-23 12:26+0200\n"
-"PO-Revision-Date: 2009-10-23 12:41+0200\n"
+"POT-Creation-Date: 2013-01-31 13:31+0100\n"
+"PO-Revision-Date: 2013-01-31 13:37+0100\n"
 "Last-Translator: Eric Brison <eric.brison@anakeen.com>\n"
 "Language-Team: French <distrib@anakeen.com>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "min delay is 5 minutes"
-msgstr "Le dÈlai minimum est de 5 minutes"
-
 #, c-format
-msgid "profil for %s mailbox"
-msgstr "Profil pour la boÓte aux lettres %s"
-
-#, c-format
-msgid "associated default profil for [ADOC %s] mailbox"
-msgstr "Profil associÈ par dÈfaut pour la boÓte aux lettres [ADOC %s]"
-
-#, c-format
-msgid "imap folder %s not found : %s"
-msgstr "le dossier imap %s est introuvable : %s"
+msgid "%d messages to transferts"
+msgstr "%d messages √† transf√©rer"
 
 #, c-format
 msgid "%d messages transfered"
-msgstr "%d messages transfÈrÈs"
+msgstr "%d messages transf√©r√©s"
 
 #, c-format
-msgid "imap folder %s not found"
-msgstr "dossier IMAP %s non trouvÈ"
+msgid "%d messages transferred"
+msgstr "%d messages transf√©r√©s"
 
 #, c-format
-msgid "Retrieve messages for %s mailbox"
-msgstr "RÈcupÈrer les messages pour la boÓte aux lettres %s"
+msgid "%s new messages"
+msgstr "%s nouveaux messages"
 
-msgid "electronic messages cannot be modified"
-msgstr "les messages Èlectroniques ne peuvent Ítre modifiÈs"
-
-msgid "Mail connector"
-msgstr "Connecteur de messagerie"
+msgid "Access admin mailboxes"
+msgstr "Acc√®s √† l'administration des bo√Ætes aux lettres"
 
 msgid "Copy messages from IMAP to freedom"
 msgstr "Copie de messages depuis IMAP vers freedom"
 
-msgid "test connection with IMAP server"
-msgstr "test de connexion vers le serveur IMAP"
+msgid "Create new mailbox"
+msgstr "Cr√©er une nouvelle bo√Æte √† lettres"
 
-msgid "retrieves messages from IMAP server"
-msgstr "rÈcupÈration des messages depuis le serveur IMAP"
+msgid "Folder"
+msgstr "Dossier"
 
-msgid "View and create new mailboxes"
-msgstr "Voir et crÈer des boites d'Èchange pour le couriel"
+msgid "IMAP Server"
+msgstr "Serveur IMAP"
 
-msgid "Service for verify new mail"
-msgstr "Service pour la vÈrifications des boites d'Èchange de couriel"
+msgid "Mail connector"
+msgstr "Connecteur de messagerie"
 
-msgid "Modify messages profils"
-msgstr "Modification du profil des messages"
+msgid "Mail connector admin"
+msgstr "Administration des bo√Ætes aux lettres"
 
-msgid "View my mailboxes"
-msgstr "Voir mes boÓtes d'Èchange"
+msgid "Mailbox Name"
+msgstr "Nom de la bo√Æte √† lettre"
 
-msgid "MB_To"
-msgstr "Pour"
-
-msgid "MB_Cc"
-msgstr "Copie ‡"
-
-msgid "Messages log"
-msgstr "Journal des messages"
-
-msgid "Retrieve date"
-msgstr "Date de rÈcupÈration"
+msgid "Manage linked mailboxes"
+msgstr "Gestion des bo√Ætes aux lettres connect√©es"
 
 msgid "Message Date"
 msgstr "Date du message"
 
+msgid "Messages log"
+msgstr "Journal des messages"
+
+msgid "Modify messages profils"
+msgstr "Modification du profil des messages"
+
+msgid "No mailboxes"
+msgstr "Pas de bo√Ætes √† lettre"
+
+msgid "Retreive messages"
+msgstr "R√©cup√©rer les messages"
+
+msgid "Retrieve date"
+msgstr "Date de r√©cup√©ration"
+
+#, c-format
+msgid "Retrieve messages for %s mailbox"
+msgstr "R√©cup√©rer les messages pour la bo√Æte aux lettres %s"
+
+msgid "Service for verify new mail"
+msgstr "Service pour la v√©rifications des boites d'√©change de couriel"
+
 msgid "Subject"
 msgstr "Sujet"
+
+msgid "Transfert"
+msgstr "Transf√©rer"
+
+msgid "View and create new mailboxes"
+msgstr "Voir et cr√©er des boites d'√©change pour le couriel"
+
+msgid "View my mailboxes"
+msgstr "Voir mes bo√Ætes d'√©change"
+
+msgid "View only first five"
+msgstr "Seul les 5 premiers sont affich√©s"
+
+#, c-format
+msgid "associated default profil for [ADOC %s] mailbox"
+msgstr "Profil associ√© par d√©faut pour la bo√Æte aux lettres [ADOC %s]"
+
+#, c-format
+msgid "cannot see unknow reference %s"
+msgstr "Ne peut voir la r√©f√©rence inconnue \"%s\""
+
+msgid "connection OK"
+msgstr "connexion OK"
+
+#, c-format
+msgid "exchange mailboxes  -%d-"
+msgstr "Bo√Æte d'√©changes -%d-"
+
+#, c-format
+msgid "imap folder %s not found"
+msgstr "dossier IMAP %s non trouv√©"
+
+#, c-format
+msgid "imap folder %s not found : %s"
+msgstr "le dossier imap %s est introuvable : %s"
 
 msgid "mbfrom"
 msgstr "De"
@@ -92,39 +127,11 @@ msgstr "De"
 msgid "mbto"
 msgstr "Pour"
 
-msgid "Create new mailbox"
-msgstr "CrÈer une nouvelle boÓte ‡ lettres"
-
-msgid "Mailbox Name"
-msgstr "Nom de la boÓte ‡ lettre"
-
-msgid "IMAP Server"
-msgstr "Serveur IMAP"
-
-msgid "No mailboxes"
-msgstr "Pas de boÓtes ‡ lettre"
-
-msgid "open it in a new window"
-msgstr "ouvrir dans une nouvelle fenÍtre"
-
-msgid "Retreive messages"
-msgstr "RÈcupÈrer les messages"
-
-msgid "Transfert"
-msgstr "TransfÈrer"
-
-msgid "View only first five"
-msgstr "Seul les 5 premiers sont affichÈs"
-
-msgid "connection OK"
-msgstr "connexion OK"
-
-#, c-format
-msgid "%d messages transferred"
-msgstr "%d messages transfÈrÈs"
+msgid "min delay is 5 minutes"
+msgstr "Le d√©lai minimum est de 5 minutes"
 
 msgid "no message profil document has been defined"
-msgstr "aucun document profil pour les messages a ÈtÈ dÈfini"
+msgstr "aucun document profil pour les messages a √©t√© d√©fini"
 
 msgid "no new messages"
 msgstr "pas de nouveau message"
@@ -132,20 +139,30 @@ msgstr "pas de nouveau message"
 msgid "one new message"
 msgstr "un nouveau message"
 
-#, c-format
-msgid "%s new messages"
-msgstr "%s nouveaux messages"
+msgid "open it in a new window"
+msgstr "ouvrir dans une nouvelle fen√™tre"
 
 #, c-format
-msgid "exchange mailboxes  -%d-"
-msgstr "BoÓte d'Èchanges -%d-"
+msgid "profil for %s mailbox"
+msgstr "Profil pour la bo√Æte aux lettres %s"
 
-#, c-format
-msgid "%d messages to transferts"
-msgstr "%d messages ‡ transfÈrer"
+msgid "retrieves messages from IMAP server"
+msgstr "r√©cup√©ration des messages depuis le serveur IMAP"
+
+msgid "test connection with IMAP server"
+msgstr "test de connexion vers le serveur IMAP"
 
 msgid "timeout in second for waiting connection"
 msgstr "timeout en secondes pour les temps de connection"
+
+#~ msgid "MB_Cc"
+#~ msgstr "Copie √†"
+
+#~ msgid "MB_To"
+#~ msgstr "Pour"
+
+#~ msgid "electronic messages cannot be modified"
+#~ msgstr "les messages √©lectroniques ne peuvent √™tre modifi√©s"
 
 #~ msgid "no new messages in imap %s folder"
 #~ msgstr "pas de nouveau message pour le dossier %s"
