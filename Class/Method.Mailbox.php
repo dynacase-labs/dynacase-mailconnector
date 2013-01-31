@@ -8,20 +8,29 @@
  * @begin-method-ignore
  * this part will be deleted when construct document class until end-method-ignore
  */
-Class _MAILBOX extends Doc
+class _MAILBOX extends Dir
 {
     /*
      * @end-method-ignore
     */
     
     public $mbox;
+    public $fimap = '';
+    public $imapconnection = '';
+    private $msgStruct = array();
+    private $msgid = null;
+    private $destFolderId = null;
+    /**
+     * @var Doc
+     */
+    private $destFolder = null;
     
     function postcreated()
     {
         $err = $this->mb_setProfil();
         if ($err == "") {
             $home = $this->getHome();
-            if ($home) $home->AddFile($this->id);
+            if ($home) $home->insertDocument($this->id);
         }
         
         return $err;
@@ -39,7 +48,7 @@ Class _MAILBOX extends Doc
     function minDelay($t)
     {
         $sug = array();
-        
+        $err = '';
         if (($t > 0) && ($t < 5)) $err = sprintf(_("min delay is 5 minutes"));
         if ($err) $sug = array(
             "0",
@@ -60,7 +69,8 @@ Class _MAILBOX extends Doc
      */
     function mb_setProfil()
     {
-        if ($this->getValue("fld_pdocid") == "") {
+        $err = '';
+        if ($this->getRawValue("fld_pdocid") == "") {
             
             $pp = createDoc($this->dbaccess, "PDIR", false);
             $pp->setValue("ba_title", sprintf(_("profil for %s mailbox") , $this->title));
@@ -83,11 +93,12 @@ Class _MAILBOX extends Doc
     function mb_connection()
     {
         include_once ("FDL/Lib.Vault.php");
-        $login = $this->getValue("mb_login");
-        $password = $this->getValue("mb_password");
-        $server = $this->getValue("mb_servername");
-        $port = $this->getValue("mb_serverport");
-        $ssl = $this->getValue("mb_security");
+        $err = '';
+        $login = $this->getRawValue("mb_login");
+        $password = $this->getRawValue("mb_password");
+        $server = $this->getRawValue("mb_servername");
+        $port = $this->getRawValue("mb_serverport");
+        $ssl = $this->getRawValue("mb_security");
         
         if ($ssl == "SSL") $this->fimap = sprintf("{%s:%d/imap/ssl/novalidate-cert}", $server, $port);
         else $this->fimap = sprintf("{%s:%d/imap/notls}", $server, $port);
@@ -107,8 +118,9 @@ Class _MAILBOX extends Doc
      */
     function mb_retrieveMessages(&$count, $fdir = "")
     {
-        if ($this->getValue("mb_recursive") == "yes") $err = $this->mb_recursiveRetrieveMessages($count);
+        if ($this->getRawValue("mb_recursive") == "yes") $err = $this->mb_recursiveRetrieveMessages($count);
         else $err = $this->mb_retrieveFolderMessages($count);
+        return $err;
     }
     /**
      * retrieve unflagged messages from specific folder (not recursive)
@@ -117,8 +129,9 @@ Class _MAILBOX extends Doc
      */
     function mb_retrieveFolderMessages(&$count, $fdir = "")
     {
+        $folder = '';
         if ($fdir == "") {
-            $folder = $this->getValue("mb_folder", "INBOX");
+            $folder = $this->getRawValue("mb_folder", "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         }
         
@@ -130,8 +143,8 @@ Class _MAILBOX extends Doc
         }
         
         if ($err == "") {
-            $pa = $this->getValue("mb_postaction", "tag");
-            $movetofolder = $this->getValue("mb_movetofolder");
+            $pa = $this->getRawValue("mb_postaction", "tag");
+            $movetofolder = $this->getRawValue("mb_movetofolder");
             $msgs = imap_search($this->mbox, 'UNFLAGGED UNDELETED');
             
             if (is_array($msgs)) {
@@ -159,11 +172,11 @@ Class _MAILBOX extends Doc
                         $count++;
                     } else addWarningMsg($err);
                 }
-                if ($this->getValue("mb_purge") == "yes") {
+                if ($this->getRawValue("mb_purge") == "yes") {
                     imap_expunge($this->mbox);
                 }
                 
-                $this->AddComment(sprintf(_("%d messages transfered") , $count));
+                $this->addHistoryEntry(sprintf(_("%d messages transfered") , $count));
             } else {
                 $count = 0;
             }
@@ -183,8 +196,8 @@ Class _MAILBOX extends Doc
      */
     function mb_retrieveSubject(&$count, &$subject, $limit = 5)
     {
-        if ($this->getValue("mb_recursive") == "yes") {
-            $folder = $this->getValue("mb_folder", "INBOX");
+        if ($this->getRawValue("mb_recursive") == "yes") {
+            $folder = $this->getRawValue("mb_folder", "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
             $folders = imap_list($this->mbox, $fdir, "*");
             $count = 0;
@@ -213,11 +226,12 @@ Class _MAILBOX extends Doc
      */
     function mb_retrieveFolderSubject(&$count, &$subject, $limit = 5, $fdir = "")
     {
+        $folder = '';
         if ($fdir == "") {
-            $folder = $this->getValue("mb_folder", "INBOX");
+            $folder = $this->getRawValue("mb_folder", "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         }
-        
+        $err = '';
         $subject = array();
         if (!@imap_reopen($this->mbox, $fdir)) {
             $err = sprintf(_("imap folder %s not found") , $folder);
@@ -247,13 +261,13 @@ Class _MAILBOX extends Doc
     }
     function postModify()
     {
-        $port = $this->getValue("mb_serverport");
-        $security = $this->getValue("mb_security");
+        $port = $this->getRawValue("mb_serverport");
+        $security = $this->getRawValue("mb_security");
         if (($port == "") && ($security != "SSL")) $this->setValue("mb_serverport", 143);
         else if (($port == "") && ($security == "SSL")) $this->setValue("mb_serverport", 993);
         else if (($port == "143") && ($security == "SSL")) $this->setValue("mb_serverport", 993);
         else if (($port == "993") && ($security != "SSL")) $this->setValue("mb_serverport", 143);
-        if (intval($this->getValue("mb_autoretrieve")) > 0) $err = $this->createMbProcessus();
+        if (intval($this->getRawValue("mb_autoretrieve")) > 0) $err = $this->createMbProcessus();
         else $err = $this->deleteMbProcessus();
         return $err;
     }
@@ -292,12 +306,12 @@ Class _MAILBOX extends Doc
                     "exec_valuevar" => $this->id
                 ));
                 
-                $doc->setValue("exec_periodmin", $this->getValue("mb_autoretrieve", " "));
+                $doc->setValue("exec_periodmin", $this->getRawValue("mb_autoretrieve", " "));
                 $doc->setValue("exec_handnextdate", $this->getTimeDate());
                 $doc->setValue("exec_title", sprintf(_("Retrieve messages for %s mailbox") , $this->getTitle()));
                 $err = $doc->add();
                 if ($err == "") {
-                    $doc->postModify();
+                    $doc->postStore();
                     $doc->refresh();
                 }
             }
@@ -324,7 +338,7 @@ Class _MAILBOX extends Doc
     function mb_parseMessage($msg)
     {
         //print "<hr>";
-        $h = imap_header($this->mbox, $msg);
+        $h = imap_headerinfo($this->mbox, $msg);
         $uid = $h->message_id;
         //    print "<b>".$this->mb_decode($h->subject)."</b> [$uid]";
         if ($uid == "") $uid = $h->date . '-' . $h->Size;
@@ -332,6 +346,10 @@ Class _MAILBOX extends Doc
         $this->msgStruct = array();
         $this->msgStruct["subject"] = $this->mb_decode($h->subject);
         $this->msgStruct["uid"] = $uid;
+        
+        if (!isset($h->cc)) $h->cc = '';
+        if (!isset($h->to)) $h->to = '';
+        if (!isset($h->from)) $h->from = '';
         
         $this->msgStruct["date"] = strftime("%Y-%m-%d %H:%M:%S", strtotime($h->date));;
         $this->msgStruct["to"] = $this->mb_implodemail($h->to);
@@ -492,16 +510,19 @@ Class _MAILBOX extends Doc
     {
         include_once ("FDL/Lib.Dir.php");
         
-        $uid = pg_escape_string($this->msgStruct["uid"]);
-        $filter[] = "emsg_uid='$uid'";
-        $filter[] = "emsg_mailboxid='" . $this->initid . "'";
-        $fammsg = $this->getValue("mb_msg_family", "EMESSAGE");
+        $fammsg = $this->getRawValue("mb_msg_family", "EMESSAGE");
         
-        $tdir = getChildDoc($this->dbaccess, 0, "0", 1, $filter, 1, "LIST", $fammsg);
-        if (count($tdir) == 0) {
+        $err = '';
+        $s = new SearchDoc($this->dbaccess, $fammsg);
+        $s->setObjectReturn(true);
+        $s->setSlice(1);
+        $s->addFilter("emsg_uid='%s'", $this->msgStruct["uid"]);
+        $s->addFilter("emsg_mailboxid='%s'", $this->initid);
+        $s->search();
+        if ($s->count() == 0) {
             $msg = createdoc($this->dbaccess, $fammsg);
         } else {
-            $msg = $tdir[0];
+            $msg = $s->getNextDoc();
         }
         if ($msg) {
             $msg->setValue("emsg_mailboxid", $this->initid);
@@ -537,12 +558,17 @@ Class _MAILBOX extends Doc
                 $msg->disableEditControl();
                 if (is_array($this->msgStruct["file"])) {
                     // Add attachments files
-                    $err = $msg->storeFiles('emsg_attach', $this->msgStruct["file"], $this->msgStruct["basename"]);
+                    if (is_array($this->msgStruct["file"])) {
+                        foreach ($this->msgStruct["file"] as $kf => $file) {
+                            $msg->setFile('emsg_attach', $file, $this->msgStruct["basename"][$kf], $kf);
+                        }
+                    }
+                    
                     foreach ($this->msgStruct["file"] as $f) {
                         if (is_file($f)) @unlink($f); // delete temporary files
                         
                     }
-                    $this->msgStruct["vid"] = $msg->getTValue('emsg_attach');
+                    $this->msgStruct["vid"] = $msg->getMultipleRawValues('emsg_attach');
                     if ($this->msgStruct["htmlbody"]) $this->msgStruct["htmlbody"] = $this->mb_replacid($this->msgStruct["htmlbody"], $msg->id);
                 }
                 
@@ -552,7 +578,7 @@ Class _MAILBOX extends Doc
                 
                 if ($err == "") {
                     $destFolder = $this->getdestFolder();
-                    $destFolder->addFile($msg->id);
+                    $destFolder->insertDocument($msg->id);
                 }
             }
             if ($err == "") {
@@ -564,7 +590,7 @@ Class _MAILBOX extends Doc
                     "to" => $this->msgStruct["to"]
                 );
                 $headmsg = serialize($headmsg);
-                $this->addComment($headmsg, HISTO_NOTICE, "MB_RETREIVE");
+                $this->addHistoryEntry($headmsg, HISTO_NOTICE, "MB_RETREIVE");
             }
         }
         return $err;
@@ -572,20 +598,22 @@ Class _MAILBOX extends Doc
     /**
      * retrieve unflagged messages from specific folder and sub folders
      * @param int  &$count return number of messages transffered
+     * @return string
      */
     function mb_recursiveRetrieveMessages(&$count)
     {
         include_once ("FDL/Lib.Dir.php");
-        $folder = $this->getValue("mb_folder", "INBOX");
+        $folder = $this->getRawValue("mb_folder", "INBOX");
         $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         $folders = imap_list($this->mbox, $fdir, "*");
-        
+        $err = '';
         $this->mb_retrieveFolderMessages($count); // main folder
         if (count($folders) > 0) {
             
-            $filter = array();
-            $filter[] = "smb_mailboxid='" . $this->initid . "'";
-            $subfolders = getChildDoc($this->dbaccess, 0, "0", "ALL", $filter, 1, "TABLE", "SUBMAILBOX");
+            $s = new SearchDoc($this->dbaccess, "SUBMAILBOX");
+            $s->addFilter("smb_mailboxid='%d'", $this->initid);
+            $s->overrideViewControl();
+            $subfolders = $s->search();
             $subtitle = array();
             if (count($subfolders) > 0) {
                 foreach ($subfolders as $ids => $dsub) $subtitle[$dsub["initid"]] = $dsub["smb_path"];
@@ -609,9 +637,12 @@ Class _MAILBOX extends Doc
                         $keypsubfolder = array_search($pfutf7, $subtitle);
                         //	  print "parent [$pfutf7] [$futf7][$keypsubfolder]<br>";
                         if ($keypsubfolder) {
+                            /**
+                             * @var Dir $pfld
+                             */
                             $pfld = new_doc($this->dbaccess, $keypsubfolder);
-                            $pfld->addFile($sub->initid);
-                        } else $this->addFile($sub->initid);
+                            $pfld->insertDocument($sub->initid);
+                        } else $this->insertDocument($sub->initid);
                         $this->setDestFolder($sub->initid);
                         $subtitle[$sub->initid] = $futf7;
                     }
@@ -631,7 +662,7 @@ Class _MAILBOX extends Doc
      * for RELATED part
      * convert cid: to local href
      * @param string $msg clear text
-     * @param docid $docid id of document message
+     * @param int $docid $docid id of document message
      * @return string the new text
      */
     private function mb_replacid($msg, $docid)
@@ -660,7 +691,7 @@ Class _MAILBOX extends Doc
     {
         $cid = substr($url, 4);
         $key = array_search($cid, $this->msgStruct["cid"]);
-        
+        $vid = 0;
         if (preg_match(PREGEXPFILE, $this->msgStruct["cid"]["key"], $reg)) {
             $vid = $reg[2];
             $mime = $reg[1];
@@ -686,9 +717,14 @@ Class _MAILBOX extends Doc
     
     function mb_isRecursive()
     {
-        return ($this->getValue("mb_recursive") == "yes") ? MENU_ACTIVE : MENU_INVISIBLE;
+        return ($this->getRawValue("mb_recursive") == "yes") ? MENU_ACTIVE : MENU_INVISIBLE;
     }
-    
+    /**
+     * @templateController mail log view
+     * @param string $target
+     * @param bool $ulink
+     * @param bool $abstract
+     */
     function maillog($target = "_self", $ulink = true, $abstract = false)
     {
         $tlog = $this->getHisto(true, "MB_RETREIVE", 300);
@@ -696,11 +732,11 @@ Class _MAILBOX extends Doc
         foreach ($tlog as $klog => $log) {
             $msghead = unserialize($log["comment"]);
             if (is_array($msghead)) {
-                $tout[$klog]["rdate"] = strftime("%d/%m/%Y %H:%M", frenchdatetounixts($log["date"]));
+                $tout[$klog]["rdate"] = strftime("%Y-%m-%d %H:%M", stringDateToUnixTs($log["date"]));
                 foreach ($msghead as $k => $v) {
                     $tout[$klog][$k] = $v;
                 }
-                $tout[$klog]["msgdate"] = strftime("%d/%m/%Y %H:%M", strtotime($tout[$klog]["date"]));
+                $tout[$klog]["msgdate"] = strftime("%Y-%m-%d %H:%M", strtotime($tout[$klog]["date"]));
             }
         }
         $this->lay->set("title", $this->getDocAnchor($this->id));

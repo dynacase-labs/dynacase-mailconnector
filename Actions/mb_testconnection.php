@@ -12,16 +12,18 @@ include_once ("FDL/Class.Doc.php");
 /**
  * Test IMAP connection
  * @param Action &$action current action
- * @global id Http var : folder mailbox identificator to test
+ * @global int $id Http var : folder mailbox identificator to test
  */
 function mb_testconnection(&$action)
 {
     // Get all the params
     $docid = GetHttpVars("id");
     $dbaccess = $action->GetParam("FREEDOM_DB");
-    
+    /**
+     * @var _MAILBOX $doc
+     */
     $doc = new_Doc($dbaccess, $docid);
-    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see unknow reference %s") , $docid));
+    if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see mb unknow reference %s") , $docid));
     
     $err = $doc->mb_connection();
     if ($err != "") {
@@ -30,7 +32,7 @@ function mb_testconnection(&$action)
     } else {
         $doc->setValue("mb_connectedimage", "mailbox_green.png");
         $action->AddWarningMsg(_("connection OK"));
-        $err = $doc->mb_retrieveSubject($count, $nothing); // just count
+        $doc->mb_retrieveSubject($count, $nothing); // just count
         if ($err != "") $action->AddWarningMsg($err);
         else $action->AddWarningMsg(sprintf(_("%d messages to transferts") , $count));
     }
