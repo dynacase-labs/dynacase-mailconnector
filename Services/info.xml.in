@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<module name="dynacase-mailconnector-services" version="@VERSION@" release="@RELEASE@" license="@LICENSE@" infopath="http://www.dynacase.org/modules/dynacase-mailconnector/dynacase-mailconnector">
+
+  <description lang="en">This package add services which can by used with dynacase-webdesk-services module.</description>
+
+
+  <requires>
+    <module name="dynacase-mailconnector" comp="ge" version="@VERSION@" />
+    <module name="dynacase-webdesk-services" />
+  </requires>
+
+  <pre-install>
+  </pre-install>
+  
+  <pre-upgrade>
+  </pre-upgrade>
+
+  <post-install>
+    <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mc_services.ods" />
+  </post-install>
+ 
+  <post-upgrade>
+    <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mc_services.ods" />
+  </post-upgrade>
+
+  <changelog>
+    <version number="0.6.1" date="2013-02-07">
+      <change title="Separated webdesk service module" />
+    </version>
+
+  </changelog>
+
+</module>

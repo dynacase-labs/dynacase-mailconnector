@@ -22,7 +22,7 @@ pages_not_php=fam2po.php po2js.php
 
 include $(utildir)/PubRule
 
-DISTFILES += $(SUBDIR) mailconnector.ods mc_services.ods \
+DISTFILES += $(SUBDIR) mailconnector.ods \
             RELEASE VERSION 
 
 $(pubdir)/EXTERNALS:
@@ -35,4 +35,13 @@ $(pubdir)/EXTERNALS/mailconnector.php : mailconnector.php
 $(pubdir)/$(appname)/%.ods : %.ods
 	cp $< $(pubdir)/$(appname)
 
-publish: $(pubdir)/$(appname)/mailconnector.ods $(pubdir)/$(appname)/mc_services.ods $(pubdir)/EXTERNALS $(pubdir)/EXTERNALS/mailconnector.php
+publish: $(pubdir)/$(appname)/mailconnector.ods  $(pubdir)/EXTERNALS $(pubdir)/EXTERNALS/mailconnector.php
+
+webinst-services:
+	make -C Services webinst RELEASE=$(RELEASE) PACKAGE=$(PACKAGE)-services VERSION=$(VERSION) appname=@APPNAME@
+	mv Services/*webinst .
+
+webinst: webinst-services
+
+clean:
+	rm -f *.*~ config.* Makefile configure info.xml Services/info.xml *webinst
