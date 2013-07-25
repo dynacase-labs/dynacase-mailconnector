@@ -12,9 +12,8 @@ function verifymail(Action & $action)
 {
     
     header('Content-type: text/xml; charset=utf-8');
-    $dbaccess = $action->GetParam("FREEDOM_DB");
     
-    $s = new SearchDoc($action->dbaccess, "MAILBOX");
+    $s = new SearchDoc($action->dbaccess, Dcp\Family\Mailbox::familyName);
     $s->addFilter("owner=%d", $action->user->id);
     $s->setObjectReturn(true);
     $s->search();
@@ -23,7 +22,7 @@ function verifymail(Action & $action)
     $tdoc = array();
     foreach ($ldoc as $k => $v) {
         /**
-         * @var _MAILBOX $v
+         * @var  Dcp\Family\Mailbox $v
          */
         $tdoc[$k] = $v->getValues();
         $tdoc[$k]["id"] = $v->id;

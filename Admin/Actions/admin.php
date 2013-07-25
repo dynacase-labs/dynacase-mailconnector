@@ -15,19 +15,19 @@ include_once ("FDL/Lib.Dir.php");
  */
 function admin(&$action, $onlymy = false)
 {
-    $dbaccess = $action->GetParam("FREEDOM_DB");
+    $dbaccess = $action->dbaccess;
     
-    $fdoc = new_doc($dbaccess, "MAILBOX");
+    $fdoc = new_doc($dbaccess, Dcp\Family\Mailbox::familyName);
     $action->parent->AddJsRef($action->GetParam("CORE_JSURL") . "/AnchorPosition.js");
     $action->parent->AddJsRef($action->GetParam("CORE_JSURL") . "/geometry.js");
     $action->parent->AddJsRef($action->GetParam("CORE_JSURL") . "/resizeimg.js");
     
-    $filter = array();
+    $s = new SearchDoc($dbaccess, Dcp\Family\Mailbox::familyName);
     if ($onlymy) {
-        $filter[] = "owner=" . intval($action->user->id);
+        $s->addFilter("owner=%d", $action->user->id);
     }
     
-    $ls = getChildDoc($dbaccess, 0, 0, "ALL", $filter, $action->user->id, "TABLE", "MAILBOX");
+    $ls = $s->search();
     foreach ($ls as $k => $v) {
         $ls[$k]["ICON"] = $fdoc->getIcon($v["icon"]);
     }
@@ -35,7 +35,7 @@ function admin(&$action, $onlymy = false)
     $action->lay->setBlockData("SPACES", $ls);
     $action->lay->set("ficon", $fdoc->geticon());
     
-    $doc = createDoc($dbaccess, "MAILBOX");
+    $doc = createDoc($dbaccess, Dcp\Family\Mailbox::familyName);
     if ($doc === false) {
         $action->lay->set("create", false);
     } else {

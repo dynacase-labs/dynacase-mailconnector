@@ -15,7 +15,7 @@ TAR = gtar
 GZIP_ENV = --best
 export targetdir PACKAGE
 
-SUBDIR= Class Actions Zone Images Admin
+SUBDIR= Class Actions Zone Images Admin locale
 
 pages_not_xml = info.xml
 pages_not_php=fam2po.php po2js.php
@@ -44,4 +44,8 @@ webinst-services:
 webinst: webinst-services
 
 clean:
-	rm -f *.*~ config.* Makefile configure info.xml Services/info.xml *webinst
+	rm -f *.*~ config.* Makefile configure info.xml Services/info.xml *webinst $(appname)_init.php Admin/MAILCONNECTORADMIN_init.php
+	rm -fr autom4te.cache
+
+stub:
+	php  $(utildir)/genStubFamilyClass.php mailconnector.ods > Class/stubMailconnectorFamilies.php
