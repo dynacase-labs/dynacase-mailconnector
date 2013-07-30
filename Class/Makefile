@@ -3,12 +3,13 @@
 #
 # ============================================
 
+pages_not_php = stubMailconnectorFamilies.php
 
 include $(utildir)/PubRule
 
 
 pages_fdl = $(patsubst %.php,$(pubdir)/$(applib)/%.php,$(wildcard Method*.php))
-pages_fdl += $(patsubst %.php,$(pubdir)/$(applib)/%.php,$(wildcard Class*.php))
+#pages_fdl += $(patsubst %.php,$(pubdir)/$(applib)/%.php,$(wildcard Class*.php))
 
 $(pubdir)/$(applib):
 	mkdir $@

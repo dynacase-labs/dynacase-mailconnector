@@ -4,15 +4,14 @@
  * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU Affero General Public License
  * @package FDL
 */
-/**
- * @begin-method-ignore
- * this part will be deleted when construct document class until end-method-ignore
- */
-class _MAILBOX extends Dir
+
+namespace Dcp\Mailconnector;
+use \Dcp\AttributeIdentifiers as Attributes;
+use \Dcp\AttributeIdentifiers\Mailbox as MyAttributes;
+use \Dcp\Family as Family;
+
+class Mailbox extends Family\Dir
 {
-    /*
-     * @end-method-ignore
-    */
     
     public $mbox;
     public $fimap = '';
@@ -21,7 +20,7 @@ class _MAILBOX extends Dir
     private $msgid = null;
     private $destFolderId = null;
     /**
-     * @var Doc
+     * @var \Doc
      */
     private $destFolder = null;
     
@@ -36,10 +35,10 @@ class _MAILBOX extends Dir
         return $err;
     }
     
-    function specRefresh()
+    function preRefresh()
     {
         if ($this->id == 0) {
-            $oa = $this->getAttribute("mb_folder");
+            $oa = $this->getAttribute(MyAttributes::mb_folder);
             $oa->mvisibility = 'S'; // need test connection before
             
         }
@@ -70,15 +69,15 @@ class _MAILBOX extends Dir
     function mb_setProfil()
     {
         $err = '';
-        if ($this->getRawValue("fld_pdocid") == "") {
+        if ($this->getRawValue(MyAttributes::fld_pdocid) == "") {
             
-            $pp = createDoc($this->dbaccess, "PDIR", false);
-            $pp->setValue("ba_title", sprintf(_("profil for %s mailbox") , $this->title));
-            $pp->setValue("prf_desc", sprintf(_("associated default profil for [ADOC %s] mailbox") , $this->id));
+            $pp = createDoc($this->dbaccess, Family\Pdir::familyName, false);
+            $pp->setValue(Attributes\Pdir::ba_title, sprintf(_("profil for %s mailbox") , $this->title));
+            $pp->setValue(Attributes\Pdir::prf_desc, sprintf(_("associated default profil for [ADOC %s] mailbox") , $this->id));
             $err = $pp->add();
             if ($err == "") {
-                $this->setValue("fld_pdocid", $pp->id);
-                $this->setValue("fld_pdirid", $pp->id);
+                $this->setValue(MyAttributes::fld_pdocid, $pp->id);
+                $this->setValue(MyAttributes::fld_pdirid, $pp->id);
                 
                 $mpp = getMyProfil($this->dbaccess);
                 if ($mpp->isAlive()) {
@@ -94,11 +93,11 @@ class _MAILBOX extends Dir
     {
         include_once ("FDL/Lib.Vault.php");
         $err = '';
-        $login = $this->getRawValue("mb_login");
-        $password = $this->getRawValue("mb_password");
-        $server = $this->getRawValue("mb_servername");
-        $port = $this->getRawValue("mb_serverport");
-        $ssl = $this->getRawValue("mb_security");
+        $login = $this->getRawValue(MyAttributes::mb_login);
+        $password = $this->getRawValue(MyAttributes::mb_password);
+        $server = $this->getRawValue(MyAttributes::mb_servername);
+        $port = $this->getRawValue(MyAttributes::mb_serverport);
+        $ssl = $this->getRawValue(MyAttributes::mb_security);
         
         if ($ssl == "SSL") $this->fimap = sprintf("{%s:%d/imap/ssl/novalidate-cert}", $server, $port);
         else $this->fimap = sprintf("{%s:%d/imap/notls}", $server, $port);
@@ -114,11 +113,13 @@ class _MAILBOX extends Dir
     }
     /**
      * retrieve unflagged messages from specific folder
-     * @param int  &$count return number of messages transffered
+     * @param int &$count return number of messages transffered
+     * @param string $fdir
+     * @return string
      */
     function mb_retrieveMessages(&$count, $fdir = "")
     {
-        if ($this->getRawValue("mb_recursive") == "yes") $err = $this->mb_recursiveRetrieveMessages($count);
+        if ($this->getRawValue(MyAttributes::mb_recursive) == "yes") $err = $this->mb_recursiveRetrieveMessages($count);
         else $err = $this->mb_retrieveFolderMessages($count);
         return $err;
     }
@@ -126,12 +127,13 @@ class _MAILBOX extends Dir
      * retrieve unflagged messages from specific folder (not recursive)
      * @param int  &$count return number of messages transffered
      * @param string $fdir imap sub folder
+     * @return string
      */
     function mb_retrieveFolderMessages(&$count, $fdir = "")
     {
         $folder = '';
         if ($fdir == "") {
-            $folder = $this->getRawValue("mb_folder", "INBOX");
+            $folder = $this->getRawValue(MyAttributes::mb_folder, "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         }
         
@@ -143,8 +145,8 @@ class _MAILBOX extends Dir
         }
         
         if ($err == "") {
-            $pa = $this->getRawValue("mb_postaction", "tag");
-            $movetofolder = $this->getRawValue("mb_movetofolder");
+            $pa = $this->getRawValue(MyAttributes::mb_postaction, "tag");
+            $movetofolder = $this->getRawValue(MyAttributes::mb_movetofolder);
             $msgs = imap_search($this->mbox, 'UNFLAGGED UNDELETED');
             
             if (is_array($msgs)) {
@@ -172,7 +174,7 @@ class _MAILBOX extends Dir
                         $count++;
                     } else addWarningMsg($err);
                 }
-                if ($this->getRawValue("mb_purge") == "yes") {
+                if ($this->getRawValue(MyAttributes::mb_purge) == "yes") {
                     imap_expunge($this->mbox);
                 }
                 
@@ -191,13 +193,14 @@ class _MAILBOX extends Dir
     }
     /**
      * retrieve subject of unflagged messages from specific folder
-     * @param int  &$count return number of messages transffered
-     * @param bool $justcount set to true to just return number of messages
+     * @param int &$count return number of messages transffered
+     * @param $subject
+     * @param int $limit
      */
     function mb_retrieveSubject(&$count, &$subject, $limit = 5)
     {
-        if ($this->getRawValue("mb_recursive") == "yes") {
-            $folder = $this->getRawValue("mb_folder", "INBOX");
+        if ($this->getRawValue(MyAttributes::mb_recursive) == "yes") {
+            $folder = $this->getRawValue(MyAttributes::mb_folder, "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
             $folders = imap_list($this->mbox, $fdir, "*");
             $count = 0;
@@ -221,14 +224,17 @@ class _MAILBOX extends Dir
     }
     /**
      * retrieve subject of unflagged messages from specific folder
-     * @param int  &$count return number of messages transffered
-     * @param bool $justcount set ti true to just return number of messages
+     * @param int &$count return number of messages transffered
+     * @param $subject
+     * @param int $limit
+     * @param string $fdir
+     * @return string
      */
     function mb_retrieveFolderSubject(&$count, &$subject, $limit = 5, $fdir = "")
     {
         $folder = '';
         if ($fdir == "") {
-            $folder = $this->getRawValue("mb_folder", "INBOX");
+            $folder = $this->getRawValue(MyAttributes::mb_folder, "INBOX");
             $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         }
         $err = '';
@@ -259,15 +265,15 @@ class _MAILBOX extends Dir
         }
         return $err;
     }
-    function postModify()
+    function postStore()
     {
-        $port = $this->getRawValue("mb_serverport");
-        $security = $this->getRawValue("mb_security");
-        if (($port == "") && ($security != "SSL")) $this->setValue("mb_serverport", 143);
-        else if (($port == "") && ($security == "SSL")) $this->setValue("mb_serverport", 993);
-        else if (($port == "143") && ($security == "SSL")) $this->setValue("mb_serverport", 993);
-        else if (($port == "993") && ($security != "SSL")) $this->setValue("mb_serverport", 143);
-        if (intval($this->getRawValue("mb_autoretrieve")) > 0) $err = $this->createMbProcessus();
+        $port = $this->getRawValue(MyAttributes::mb_serverport);
+        $security = $this->getRawValue(MyAttributes::mb_security);
+        if (($port == "") && ($security != "SSL")) $this->setValue(MyAttributes::mb_serverport, 143);
+        else if (($port == "") && ($security == "SSL")) $this->setValue(MyAttributes::mb_serverport, 993);
+        else if (($port == "143") && ($security == "SSL")) $this->setValue(MyAttributes::mb_serverport, 993);
+        else if (($port == "993") && ($security != "SSL")) $this->setValue(MyAttributes::mb_serverport, 143);
+        if (intval($this->getRawValue(MyAttributes::mb_autoretrieve)) > 0) $err = $this->createMbProcessus();
         else $err = $this->deleteMbProcessus();
         return $err;
     }
@@ -294,26 +300,25 @@ class _MAILBOX extends Dir
         $doc = new_doc($this->dbaccess, $name);
         $err = "";
         if (!$doc->isAlive()) {
-            $doc = createDoc($this->dbaccess, "EXEC", false);
+            /**
+             * @var Family\Exec $doc
+             */
+            $doc = createDoc($this->dbaccess, Family\Exec::familyName, false);
             if ($doc) {
                 $doc->disableEditControl();
                 $doc->name = $name;
-                $doc->setValue("exec_application", "MAILCONNECTOR");
-                $doc->setValue("exec_action", "MB_RETRIEVEMESSAGES");
+                $doc->setValue(Attributes\Exec::exec_application, "MAILCONNECTOR");
+                $doc->setValue(Attributes\Exec::exec_action, "MB_RETRIEVEMESSAGES");
                 
-                $doc->addArrayRow("exec_t_parameters", array(
-                    "exec_idvar" => "id",
-                    "exec_valuevar" => $this->id
+                $doc->addArrayRow(Attributes\Exec::exec_t_parameters, array(
+                    Attributes\Exec::exec_idvar => "id",
+                    Attributes\Exec::exec_valuevar => $this->id
                 ));
                 
-                $doc->setValue("exec_periodmin", $this->getRawValue("mb_autoretrieve", " "));
-                $doc->setValue("exec_handnextdate", $this->getTimeDate());
-                $doc->setValue("exec_title", sprintf(_("Retrieve messages for %s mailbox") , $this->getTitle()));
-                $err = $doc->add();
-                if ($err == "") {
-                    $doc->postStore();
-                    $doc->refresh();
-                }
+                $doc->setValue(Attributes\Exec::exec_periodmin, $this->getRawValue(MyAttributes::mb_autoretrieve, " "));
+                $doc->setValue(Attributes\Exec::exec_handnextdate, $this->getTimeDate());
+                $doc->setValue(Attributes\Exec::exec_title, sprintf(_("Retrieve messages for %s mailbox") , $this->getTitle()));
+                $err = $doc->store();
             }
         }
         return $err;
@@ -397,7 +402,7 @@ class _MAILBOX extends Dir
     }
     /**
      * decode part of mail
-     * @param stdClass $part part object from imap_fetchstructure
+     * @param \stdClass $part part object from imap_fetchstructure
      * @param string &$body the message to decode
      *
      */
@@ -424,7 +429,7 @@ class _MAILBOX extends Dir
             case 5: // Others
                 break;
         }
-        
+        if (!seems_utf8($body)) $body = utf8_encode($body);
         if ($part->ifparameters) {
             foreach ($part->parameters as $v) {
                 if (strtolower($v->attribute) == "charset") {
@@ -435,7 +440,7 @@ class _MAILBOX extends Dir
     }
     /**
      * analyse multipart of mail
-     * @param stdClass $o part object from imap_fetchstructure
+     * @param \stdClass $o part object from imap_fetchstructure
      * @param int $msg the message identificator from imap_search
      * @param string $chap index of chapter like 2.3
      *
@@ -456,6 +461,7 @@ class _MAILBOX extends Dir
                 $this->mb_bodydecode($part, $body);
                 $this->msgStruct["htmlbody"] = $body;
             } else {
+                if (!isset($part->disposition)) $part->disposition = "";
                 $part->disposition = strtoupper($part->disposition);
                 if (($part->disposition == "INLINE") || ($part->disposition == "ATTACHMENT")) {
                     $body = imap_fetchbody($this->mbox, $msg, sprintf("$chap%d", $k + 1));
@@ -487,7 +493,7 @@ class _MAILBOX extends Dir
     }
     /**
      * recompose mail address from structure
-     * @param stdClass $struct objets from imap_header
+     * @param \stdClass $struct objets from imap_header
      * @return string mail address like John Doe <jd@somewhere.ord>
      */
     static function mb_implodemail($struct)
@@ -510,14 +516,14 @@ class _MAILBOX extends Dir
     {
         include_once ("FDL/Lib.Dir.php");
         
-        $fammsg = $this->getRawValue("mb_msg_family", "EMESSAGE");
+        $fammsg = $this->getRawValue(MyAttributes::mb_msg_family, Family\Emessage::familyName);
         
         $err = '';
-        $s = new SearchDoc($this->dbaccess, $fammsg);
+        $s = new \SearchDoc($this->dbaccess, $fammsg);
         $s->setObjectReturn(true);
         $s->setSlice(1);
-        $s->addFilter("emsg_uid='%s'", $this->msgStruct["uid"]);
-        $s->addFilter("emsg_mailboxid='%s'", $this->initid);
+        $s->addFilter("%s='%s'", Attributes\Emessage::emsg_uid, $this->msgStruct["uid"]);
+        $s->addFilter("%s='%s'", Attributes\Emessage::emsg_mailboxid, $this->initid);
         $s->search();
         if ($s->count() == 0) {
             $msg = createdoc($this->dbaccess, $fammsg);
@@ -525,13 +531,13 @@ class _MAILBOX extends Dir
             $msg = $s->getNextDoc();
         }
         if ($msg) {
-            $msg->setValue("emsg_mailboxid", $this->initid);
-            $msg->setValue("emsg_uid", $this->msgStruct["uid"]);
-            $msg->setValue("emsg_subject", $this->msgStruct["subject"]);
-            $msg->setValue("emsg_from", $this->msgStruct["from"]);
-            $msg->setValue("emsg_date", $this->msgStruct["date"]);
-            $msg->setValue("emsg_size", $this->msgStruct["size"]);
-            $msg->setValue("emsg_textbody", $this->msgStruct["textbody"] == "" ? ' ' : $this->msgStruct["textbody"]);
+            $msg->setValue(Attributes\Emessage::emsg_mailboxid, $this->initid);
+            $msg->setValue(Attributes\Emessage::emsg_uid, $this->msgStruct["uid"]);
+            $msg->setValue(Attributes\Emessage::emsg_subject, $this->msgStruct["subject"]);
+            $msg->setValue(Attributes\Emessage::emsg_from, $this->msgStruct["from"]);
+            $msg->setValue(Attributes\Emessage::emsg_date, $this->msgStruct["date"]);
+            $msg->setValue(Attributes\Emessage::emsg_size, $this->msgStruct["size"]);
+            $msg->setValue(Attributes\Emessage::emsg_textbody, (!isset($this->msgStruct["textbody"]) || $this->msgStruct["textbody"] == "") ? ' ' : $this->msgStruct["textbody"]);
             
             $ttype = array();
             $tname = array();
@@ -550,17 +556,17 @@ class _MAILBOX extends Dir
                 }
             }
             
-            $msg->setValue("emsg_sendtype", $ttype);
-            $msg->setValue("emsg_recipient", $tname);
+            $msg->setValue(Attributes\Emessage::emsg_sendtype, $ttype);
+            $msg->setValue(Attributes\Emessage::emsg_recipient, $tname);
             if (!$msg->isAffected()) $err = $msg->Add();
             
             if ($err == "") {
                 $msg->disableEditControl();
-                if (is_array($this->msgStruct["file"])) {
+                if (isset($this->msgStruct["file"]) && is_array($this->msgStruct["file"])) {
                     // Add attachments files
                     if (is_array($this->msgStruct["file"])) {
                         foreach ($this->msgStruct["file"] as $kf => $file) {
-                            $msg->setFile('emsg_attach', $file, $this->msgStruct["basename"][$kf], $kf);
+                            $msg->setFile(Attributes\Emessage::emsg_attach, $file, $this->msgStruct["basename"][$kf], $kf);
                         }
                     }
                     
@@ -568,15 +574,18 @@ class _MAILBOX extends Dir
                         if (is_file($f)) @unlink($f); // delete temporary files
                         
                     }
-                    $this->msgStruct["vid"] = $msg->getMultipleRawValues('emsg_attach');
-                    if ($this->msgStruct["htmlbody"]) $this->msgStruct["htmlbody"] = $this->mb_replacid($this->msgStruct["htmlbody"], $msg->id);
+                    $this->msgStruct["vid"] = $msg->getMultipleRawValues(Attributes\Emessage::emsg_attach);
+                    if (isset($this->msgStruct["htmlbody"]) && $this->msgStruct["htmlbody"]) $this->msgStruct["htmlbody"] = $this->mb_replacid($this->msgStruct["htmlbody"], $msg->id);
                 }
                 
-                $msg->setValue("emsg_htmlbody", $this->msgStruct["htmlbody"] == "" ? ' ' : $this->msgStruct["htmlbody"]);
+                $msg->setValue(Attributes\Emessage::emsg_htmlbody, (!isset($this->msgStruct["htmlbody"]) || $this->msgStruct["htmlbody"] == "") ? ' ' : $this->msgStruct["htmlbody"]);
                 
                 $err = $msg->Modify();
                 
                 if ($err == "") {
+                    /**
+                     * @var \Dir $destFolder
+                     */
                     $destFolder = $this->getdestFolder();
                     $destFolder->insertDocument($msg->id);
                 }
@@ -590,7 +599,7 @@ class _MAILBOX extends Dir
                     "to" => $this->msgStruct["to"]
                 );
                 $headmsg = serialize($headmsg);
-                $this->addHistoryEntry($headmsg, HISTO_NOTICE, "MB_RETREIVE");
+                $this->addHistoryEntry($headmsg, \DocHisto::NOTICE, "MB_RETREIVE");
             }
         }
         return $err;
@@ -603,20 +612,20 @@ class _MAILBOX extends Dir
     function mb_recursiveRetrieveMessages(&$count)
     {
         include_once ("FDL/Lib.Dir.php");
-        $folder = $this->getRawValue("mb_folder", "INBOX");
+        $folder = $this->getRawValue(MyAttributes::mb_folder, "INBOX");
         $fdir = $this->fimap . mb_convert_encoding($folder, "UTF7-IMAP", "UTF8");
         $folders = imap_list($this->mbox, $fdir, "*");
         $err = '';
         $this->mb_retrieveFolderMessages($count); // main folder
         if (count($folders) > 0) {
             
-            $s = new SearchDoc($this->dbaccess, "SUBMAILBOX");
-            $s->addFilter("smb_mailboxid='%d'", $this->initid);
+            $s = new \SearchDoc($this->dbaccess, Family\Submailbox::familyName);
+            $s->addFilter("%s='%d'", Attributes\Submailbox::smb_mailboxid, $this->initid);
             $s->overrideViewControl();
             $subfolders = $s->search();
             $subtitle = array();
             if (count($subfolders) > 0) {
-                foreach ($subfolders as $ids => $dsub) $subtitle[$dsub["initid"]] = $dsub["smb_path"];
+                foreach ($subfolders as $ids => $dsub) $subtitle[$dsub["initid"]] = $dsub[Attributes\Submailbox::smb_path];
             }
             // unset($folders[0]);
             foreach ($folders as $k => $subfld) {
@@ -626,10 +635,11 @@ class _MAILBOX extends Dir
                 $keysubfolder = array_search($f, $subtitle);
                 if (!$keysubfolder) {
                     // new sub folder : create it
-                    $sub = createDoc($this->dbaccess, "SUBMAILBOX");
-                    $sub->setValue("smb_path", $f);
-                    $sub->setValue("ba_title", substr($f, strrpos($f, '.') + 1));
-                    $sub->setValue("smb_mailboxid", $this->initid);
+                    $sub = createDoc($this->dbaccess, Family\Submailbox::familyName);
+                    $sub->setValue(Attributes\Submailbox::smb_path, $f);
+                    $title = strrpos($f, '.') === false ? (strrpos($f, '/') === false ? $f : substr($f, strrpos($f, '/') + 1)) : substr($f, strrpos($f, '.') + 1);
+                    $sub->setValue(Attributes\Submailbox::ba_title, $title);
+                    $sub->setValue(Attributes\Submailbox::smb_mailboxid, $this->initid);
                     $err = $sub->Add();
                     if ($err == "") {
                         $futf7 = substr($subfld, strpos($subfld, '}') + 1);
@@ -638,7 +648,7 @@ class _MAILBOX extends Dir
                         //	  print "parent [$pfutf7] [$futf7][$keypsubfolder]<br>";
                         if ($keypsubfolder) {
                             /**
-                             * @var Dir $pfld
+                             * @var \Dir $pfld
                              */
                             $pfld = new_doc($this->dbaccess, $keypsubfolder);
                             $pfld->insertDocument($sub->initid);
@@ -692,7 +702,7 @@ class _MAILBOX extends Dir
         $cid = substr($url, 4);
         $key = array_search($cid, $this->msgStruct["cid"]);
         $vid = 0;
-        if (preg_match(PREGEXPFILE, $this->msgStruct["cid"]["key"], $reg)) {
+        if (isset($this->msgStruct["cid"]["key"]) && preg_match(PREGEXPFILE, $this->msgStruct["cid"]["key"], $reg)) {
             $vid = $reg[2];
             $mime = $reg[1];
         }
@@ -709,7 +719,10 @@ class _MAILBOX extends Dir
     
     private function getDestFolder()
     {
-        if (isset($this->destFolder) && $this->destFolder->initid == $this->destFolderId) return $this->destFolder;
+        if (isset($this->destFolder)) {
+            $initid = is_object($this->destFolder) ? $this->destFolder->initid : $this->destFolder["initid"];
+            if ($initid == $this->destFolderId) return $this->destFolder;
+        }
         if (!$this->destFolderId) return $this;
         $this->destFolder = new_doc($this->dbaccess, $this->destFolderId);
         return $this->destFolder;
@@ -717,7 +730,7 @@ class _MAILBOX extends Dir
     
     function mb_isRecursive()
     {
-        return ($this->getRawValue("mb_recursive") == "yes") ? MENU_ACTIVE : MENU_INVISIBLE;
+        return ($this->getRawValue(MyAttributes::mb_recursive) == "yes") ? MENU_ACTIVE : MENU_INVISIBLE;
     }
     /**
      * @templateController mail log view

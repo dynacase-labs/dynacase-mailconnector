@@ -7,7 +7,7 @@
 /**
  * Test IMAP connection
  */
-
+use \Dcp\AttributeIdentifiers\Mailbox as MyAttributes;
 include_once ("FDL/Class.Doc.php");
 /**
  * Test IMAP connection
@@ -20,17 +20,17 @@ function mb_testconnection(&$action)
     $docid = GetHttpVars("id");
     $dbaccess = $action->GetParam("FREEDOM_DB");
     /**
-     * @var _MAILBOX $doc
+     * @var \Dcp\Family\Mailbox $doc
      */
     $doc = new_Doc($dbaccess, $docid);
     if (!$doc->isAlive()) $action->exitError(sprintf(_("cannot see mb unknow reference %s") , $docid));
     
     $err = $doc->mb_connection();
     if ($err != "") {
-        $doc->setValue("mb_connectedimage", "mailbox_red.png");
+        $doc->setValue(MyAttributes::mb_connectedimage, "mailbox_red.png");
         $action->AddWarningMsg($err);
     } else {
-        $doc->setValue("mb_connectedimage", "mailbox_green.png");
+        $doc->setValue(MyAttributes::mb_connectedimage, "mailbox_green.png");
         $action->AddWarningMsg(_("connection OK"));
         $doc->mb_retrieveSubject($count, $nothing); // just count
         if ($err != "") $action->AddWarningMsg($err);

@@ -7,9 +7,14 @@
 
 function getimapfolders($mboxid)
 {
-    $dbaccess = getParam("FREEDOM_DB");
-    $mb = new_doc($dbaccess, $mboxid);
+    $err = "";
+    $tr = array();
+    /**
+     * @var \Dcp\Family\Mailbox $mb
+     */
+    $mb = new_doc("", $mboxid);
     if ($mb->isAlive()) {
+        if ($mb->doctype === "C") return _("Can't find folder in documents creation, save document before choosing folder");
         $err = $mb->mb_connection();
         if ($err == "") {
             $list = imap_list($mb->mbox, $mb->fimap, "*");
