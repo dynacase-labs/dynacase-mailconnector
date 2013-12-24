@@ -23,11 +23,4 @@
     <process command="./wsh.php --api=importDocuments --file=./MAILCONNECTOR/mc_services.ods" />
   </post-upgrade>
 
-  <changelog>
-    <version number="0.6.1" date="2013-02-07">
-      <change title="Separated webdesk service module" />
-    </version>
-
-  </changelog>
-
 </module>
