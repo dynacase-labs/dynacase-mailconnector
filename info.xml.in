@@ -46,13 +46,4 @@ The mailbox folder can transfert messages from IMAP folder messages to dynacase 
     <process command="programs/update_catalog" />
   </post-upgrade>
 
-  <changelog>
-    <version number="0.4.4-5" date="2010-03-03">
-      <change title="Added infopath link" />
-    </version>
-    <version number="0.4.4-4" date="2009-12-28">
-      <change title="Removed PHP 5.3 deprecated functions" />
-    </version>
-  </changelog>
-
 </module>
